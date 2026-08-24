@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Unit 간부용 결재 관리 시스템 (Galaxy Style)</title>
+  <title>Smart Unit 간부용 결재 및 진료 확인 시스템</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -22,7 +22,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
     body { background-color: #020617; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
 
-    /* 갤럭시 스타일 프레임 */
     .galaxy-device {
       width: 100%;
       max-width: 412px;
@@ -55,7 +54,6 @@
     .view-page { display: none; }
     .view-page.active { display: block; }
 
-    /* 홈 메인화면 */
     .welcome-card { background: linear-gradient(135deg, #1b4998, #2563eb); color: white; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
     .welcome-card h3 { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
     .welcome-card p { font-size: 11px; opacity: 0.9; }
@@ -67,7 +65,6 @@
 
     .section-title { font-size: 13px; font-weight: bold; color: var(--text); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     
-    /* Quick Menu Grid (추후 신규 확장 모듈 고려) */
     .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
     .menu-item { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
     .menu-item:active { background: var(--primary-light); }
@@ -77,7 +74,6 @@
 
     .notif-item { background: white; border-radius: 6px; border: 1px solid var(--border); padding: 10px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; cursor: pointer; }
 
-    /* 필터 탭 & 카드 */
     .filter-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
     .tab-btn { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; white-space: nowrap; }
     .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
@@ -91,7 +87,6 @@
     .badge-success { background: #d1fae5; color: #065f46; }
     .badge-reject { background: #fee2e2; color: #991b1b; }
 
-    /* 레이어 팝업 공통 */
     .layer-overlay {
       position: absolute; inset: 0; background: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 200; padding: 16px;
@@ -108,7 +103,7 @@
     
     .info-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
     .info-table th, .info-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
-    .info-table th { background: #f1f5f9; color: #475569; width: 32%; }
+    .info-table th { background: #f1f5f9; color: #475569; width: 34%; }
 
     .popup-footer { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; gap: 8px; }
     .btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
@@ -116,7 +111,6 @@
     .btn-reject { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
     .btn-approve { background: var(--primary); color: white; }
 
-    /* 하단 네비게이션 */
     .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 56px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--sub-text); cursor: pointer; width: 25%; }
     .nav-item.active { color: var(--primary); font-weight: bold; }
@@ -132,12 +126,11 @@
     <div><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-signal"></i> <i class="fa-solid fa-battery-three-quarters"></i></div>
   </div>
 
-  <!-- 간부 권한 전용 스위처 (용사 제외) -->
   <div class="role-switcher">
     <span><i class="fa-solid fa-user-gear"></i> 시연 권한:</span>
     <select id="roleSelect" onchange="changeRole()">
-      <option value="ADMIN">행정보급관 (검토자)</option>
-      <option value="COMMANDER">중대장 (최종 결재권자)</option>
+      <option value="ADMIN">행정보급관 (검토/확인자)</option>
+      <option value="COMMANDER">중대장 (최종 결재/확인자)</option>
     </select>
   </div>
 
@@ -151,29 +144,28 @@
     <div id="viewHome" class="view-page active">
       <div class="welcome-card">
         <h3 id="welcomeText">충성! 행정보급관님</h3>
-        <p id="welcomeSub">용사 출타 검토 및 부대 지휘결재 안건을 관리합니다.</p>
+        <p id="welcomeSub">용사 출타 검토 및 진료 확인 현황을 관리합니다.</p>
       </div>
 
       <div class="stat-grid">
         <div class="stat-card">
-          <div class="label">검토 대기</div>
+          <div class="label">출타 검토대기</div>
           <div class="num" id="statReview">1건</div>
         </div>
         <div class="stat-card">
-          <div class="label">결재 대기</div>
-          <div class="num" id="statApproval">1건</div>
+          <div class="label">진료 확인대기</div>
+          <div class="num" id="statMedicalPending" style="color:var(--warning)">1건</div>
         </div>
         <div class="stat-card">
-          <div class="label">오늘 출타</div>
-          <div class="num" style="color:#10b981;">3명</div>
+          <div class="label">오늘 외진예정</div>
+          <div class="num" style="color:#10b981;">2명</div>
         </div>
       </div>
 
       <div class="section-title">
-        <span><i class="fa-solid fa-layer-group"></i> 부대 지휘결재 메뉴</span>
+        <span><i class="fa-solid fa-layer-group"></i> 부대 지휘결재 및 업무 메뉴</span>
       </div>
 
-      <!-- 확장 가능한 Quick Menu (기능에 맞춘 명칭 변경 및 신규 기능 슬롯 반영) -->
       <div class="menu-grid">
         <div class="menu-item" onclick="switchNav('approval')">
           <i class="fa-solid fa-file-signature"></i>
@@ -181,25 +173,25 @@
         </div>
         <div class="menu-item" onclick="switchNav('hospital')">
           <i class="fa-solid fa-hospital-user"></i>
-          <span>외진/진료 승인</span>
+          <span>진료 신청 확인</span>
         </div>
-        <div class="menu-item disabled" onclick="alert('샘플 확장 모듈: 배차 신청 및 지휘 승인 기능 준비 중')">
+        <div class="menu-item disabled" onclick="alert('배차 지휘승인 기능 준비 중')">
           <i class="fa-solid fa-truck-monster"></i>
           <span>배차 지휘승인</span>
         </div>
-        <div class="menu-item disabled" onclick="alert('샘플 확장 모듈: 당직 명령 및 무기/탄약 승인 준비 중')">
+        <div class="menu-item disabled" onclick="alert('당직 및 무기/탄약 승인 준비 중')">
           <i class="fa-solid fa-shield-halved"></i>
           <span>당직/무기 관리</span>
         </div>
-        <div class="menu-item disabled" onclick="alert('샘플 확장 모듈: 포상 및 성과제 외박 관리 준비 중')">
+        <div class="menu-item disabled" onclick="alert('포상 및 성과제 외박 관리 준비 중')">
           <i class="fa-solid fa-award"></i>
           <span>포상/특박 관리</span>
         </div>
-        <div class="menu-item disabled" onclick="alert('샘플 확장 모듈: 부대 훈련 및 일과표 관리 준비 중')">
+        <div class="menu-item disabled" onclick="alert('부대 훈련 및 일과표 관리 준비 중')">
           <i class="fa-solid fa-calendar-check"></i>
           <span>훈련/일정 관리</span>
         </div>
-        <div class="menu-item disabled" onclick="alert('샘플 확장 모듈: 부대 인원 현황 파악 준비 중')">
+        <div class="menu-item disabled" onclick="alert('부대 인원 현황 파악 준비 중')">
           <i class="fa-solid fa-users-viewfinder"></i>
           <span>인원/병력 현황</span>
         </div>
@@ -210,15 +202,13 @@
       </div>
 
       <div class="section-title">
-        <span><i class="fa-solid fa-clock-rotate-left"></i> 최근 결재/검토 요청</span>
+        <span><i class="fa-solid fa-clock-rotate-left"></i> 최근 요청 및 진료 접수</span>
       </div>
 
-      <div id="recentNotifList">
-        <!-- JS 자동 생성 -->
-      </div>
+      <div id="recentNotifList"></div>
     </div>
 
-    <!-- 2. 결재 및 신청 목록 화면 -->
+    <!-- 2. 출타 검토/결재 목록 화면 -->
     <div id="viewApproval" class="view-page">
       <div class="filter-tabs">
         <button class="tab-btn active" onclick="filterList('ALL')">전체</button>
@@ -231,9 +221,20 @@
       <div id="requestList"></div>
     </div>
 
+    <!-- 3. 진료 신청 확인 목록 화면 (별도 결재 단계 없이 내용 확인 처리) -->
+    <div id="viewHospital" class="view-page">
+      <div class="filter-tabs">
+        <button class="tab-btn active" onclick="filterMedical('ALL')">전체</button>
+        <button class="tab-btn" onclick="filterMedical('SUBMITTED')">확인대기</button>
+        <button class="tab-btn" onclick="filterMedical('CONFIRMED')">확인완료</button>
+      </div>
+
+      <div id="medicalList"></div>
+    </div>
+
   </div>
 
-  <!-- 1차 상세 레이어 팝업 -->
+  <!-- 1차 출타 상세 레이어 팝업 -->
   <div class="layer-overlay" id="layerOverlay">
     <div class="layer-popup">
       <div class="popup-header">
@@ -264,7 +265,38 @@
     </div>
   </div>
 
-  <!-- 2차 반려 사유 입력 레이어 팝업 -->
+  <!-- 1차 진료 신청 상세 확인 레이어 팝업 (단단형 단순확인) -->
+  <div class="layer-overlay" id="medicalLayerOverlay">
+    <div class="layer-popup">
+      <div class="popup-header">
+        <h3 style="font-size: 14px; font-weight: bold; color: var(--text);"><i class="fa-solid fa-notes-medical" style="color:var(--primary);"></i> 진료 신청 상세 내용</h3>
+        <i class="fa-solid fa-xmark" onclick="closeMedicalPopup()" style="cursor:pointer; font-size: 16px; color: #64748b;"></i>
+      </div>
+      
+      <div class="popup-body">
+        <div style="background:#eff6ff; padding:8px 10px; border-radius:4px; font-size:11px; color:#1e40af; margin-bottom:10px;">
+          <i class="fa-solid fa-circle-info"></i> 진료 신청은 별도의 결재 단계 없이 간부 확인 및 기록 목적으로 관리됩니다.
+        </div>
+        <table class="info-table">
+          <tr><th>신청자 (용사)</th><td id="medUser">이병 이몽룡</td></tr>
+          <tr><th>군번</th><td id="medCode">26-992101</td></tr>
+          <tr><th>진료 유형</th><td id="medMedicalType">초진</td></tr>
+          <tr><th>대상 병원</th><td id="medHospital">국군수도병원</td></tr>
+          <tr><th>진료과</th><td id="medDept">정형외과</td></tr>
+          <tr><th>진료 희망일</th><td id="medDate">2026.08.28 (금)</td></tr>
+          <tr><th>증상 및 사유</th><td id="medSymptom">훈련 중 우측 발목 捻挫 증상 지속</td></tr>
+          <tr><th>확인 상태</th><td id="medStatus">확인대기</td></tr>
+        </table>
+      </div>
+
+      <div class="popup-footer" id="medActionBtnGroup">
+        <button class="btn btn-cancel" onclick="closeMedicalPopup()">닫기</button>
+        <button class="btn btn-approve" id="medConfirmBtn" onclick="requestMedicalConfirm()">신청 내용 확인 처리</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2차 반려 사유 입력 레이어 팝업 (출타 전용) -->
   <div class="layer-overlay" id="rejectOverlay" style="z-index: 300;">
     <div class="layer-popup">
       <div class="popup-header">
@@ -294,7 +326,7 @@
       
       <div class="popup-body" style="text-align: center; padding: 20px 16px;">
         <p style="font-size: 13px; font-weight: bold; color: var(--text);" id="confirmMessage">이 작업을 진행하시겠습니까?</p>
-        <p style="font-size: 11px; color: var(--sub-text); margin-top: 4px;">처리 후에는 상태가 변경됩니다.</p>
+        <p style="font-size: 11px; color: var(--sub-text); margin-top: 4px;">처리 후 상태가 변경 반영됩니다.</p>
       </div>
 
       <div class="popup-footer">
@@ -312,7 +344,7 @@
       <i class="fa-solid fa-file-signature"></i>출타검토
     </div>
     <div class="nav-item" id="navHospital" onclick="switchNav('hospital')">
-      <i class="fa-solid fa-hospital-user"></i>외진승인
+      <i class="fa-solid fa-hospital-user"></i>진료확인
     </div>
     <div class="nav-item" onclick="alert('간부 마이페이지 연동 예정입니다.')">
       <i class="fa-solid fa-user-shield"></i>마이페이지
@@ -321,17 +353,24 @@
 </div>
 
 <script>
-  /* 이병, 일병, 상병, 병장 계급 반영 데이터 구조 */
+  /* 출타 결재 데이터 */
   let requests = [
-    { id: 82, type: '외출', user: '일병 홍길동', code: '25-912301', date: '2026.06.06 (09:00~18:00)', dest: '부산광역시 남구', reason: '포상외출', status: 'REVIEW', rejectReason: '' },
-    { id: 81, type: '휴가', user: '상병 임꺽정', code: '25-710239', date: '2026.07.01 ~ 2026.07.05', dest: '서울특별시 마포구', reason: '정기휴가', status: 'APPROVAL', rejectReason: '' },
-    { id: 80, type: '외박', user: '병장 이순신', code: '24-110293', date: '2026.06.12 ~ 2026.06.13', dest: '강원도 춘천시', reason: '성과제 외박', status: 'SUCCESS', rejectReason: '' },
-    { id: 79, type: '진료', user: '이병 이몽룡', code: '26-992101', date: '2026.06.08', dest: '수도병원 내과', reason: '감기 몸살 외진 신청', status: 'REJECT', rejectReason: '부대 훈련 일정과 중복' }
+    { id: 82, type: '외출', user: '일병 홍길동', code: '25-912301', date: '2026.09.05 (09:00~18:00)', dest: '부산광역시 남구', reason: '포상외출', status: 'REVIEW', rejectReason: '' },
+    { id: 81, type: '휴가', user: '상병 임꺽정', code: '25-710239', date: '2026.09.10 ~ 2026.09.14', dest: '서울특별시 마포구', reason: '정기휴가', status: 'APPROVAL', rejectReason: '' },
+    { id: 80, type: '외박', user: '병장 이순신', code: '24-110293', date: '2026.09.12 ~ 2026.09.13', dest: '강원도 춘천시', reason: '성과제 외박', status: 'SUCCESS', rejectReason: '' }
+  ];
+
+  /* 진료 신청 데이터 (결재 없이 확인 기능만 존재) */
+  let medicalRequests = [
+    { id: 101, user: '이병 이몽룡', code: '26-992101', medicalType: '초진', hospital: '국군수도병원', dept: '정형외과', date: '2026.08.28', symptom: '훈련 중 우측 발목 통증', status: 'SUBMITTED' },
+    { id: 102, user: '상병 강감찬', code: '25-330192', medicalType: '재진', hospital: '대전지구병원', dept: '이비인후과', date: '2026.08.26', symptom: '비염 치료 지속', status: 'CONFIRMED' }
   ];
 
   let currentRole = 'ADMIN';
   let currentFilter = 'ALL';
+  let currentMedicalFilter = 'ALL';
   let selectedReqId = null;
+  let selectedMedicalId = null;
   let pendingAction = null;
 
   function changeRole() {
@@ -341,12 +380,13 @@
 
     if(currentRole === 'ADMIN') {
       welcomeText.innerText = '충성! 행정보급관님';
-      welcomeSub.innerText = '용사 출타 검토 및 결재 상신 업무를 수행합니다.';
+      welcomeSub.innerText = '용사 출타 검토 및 진료확인 신청을 관리합니다.';
     } else if(currentRole === 'COMMANDER') {
       welcomeText.innerText = '충성! 중대장님';
-      welcomeSub.innerText = '최종 결재 승인 대기 안건을 심사합니다.';
+      welcomeSub.innerText = '최종 결재 안건 심사 및 부대 진료 접수를 확인합니다.';
     }
     renderList();
+    renderMedicalList();
     renderHomeNotif();
   }
 
@@ -366,9 +406,9 @@
       headerTitle.innerHTML = `<i class="fa-solid fa-file-signature"></i> 용사 출타 검토 및 결재`;
     } else if(target === 'hospital') {
       document.getElementById('navHospital').classList.add('active');
-      document.getElementById('viewApproval').classList.add('active');
-      headerTitle.innerHTML = `<i class="fa-solid fa-hospital-user"></i> 용사 외진/진료 승인 현황`;
-      filterList('ALL');
+      document.getElementById('viewHospital').classList.add('active');
+      headerTitle.innerHTML = `<i class="fa-solid fa-hospital-user"></i> 용사 진료 신청 확인`;
+      renderMedicalList();
     }
   }
 
@@ -405,17 +445,57 @@
     });
 
     document.getElementById('statReview').innerText = requests.filter(r => r.status === 'REVIEW').length + '건';
-    document.getElementById('statApproval').innerText = requests.filter(r => r.status === 'APPROVAL').length + '건';
+  }
+
+  function renderMedicalList() {
+    const listEl = document.getElementById('medicalList');
+    listEl.innerHTML = '';
+
+    const filtered = medicalRequests.filter(m => currentMedicalFilter === 'ALL' || m.status === currentMedicalFilter);
+
+    if(filtered.length === 0) {
+      listEl.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:30px; font-size:12px;">진료 신청 내역이 없습니다.</div>`;
+      return;
+    }
+
+    filtered.forEach(item => {
+      let badgeHtml = item.status === 'SUBMITTED' 
+        ? `<span class="badge badge-review">확인대기</span>` 
+        : `<span class="badge badge-success">확인완료</span>`;
+
+      const card = document.createElement('div');
+      card.className = 'req-card';
+      card.onclick = () => openMedicalPopup(item.id);
+      card.innerHTML = `
+        <div class="card-header">
+          <strong style="font-size:13px; color:#0f172a;">[진료확인] ${item.user} (${item.medicalType})</strong>
+          ${badgeHtml}
+        </div>
+        <div style="font-size:11px; color:#64748b;">병원/과: ${item.hospital} (${item.dept})</div>
+        <div style="font-size:11px; color:#64748b;">희망일: ${item.date}</div>
+      `;
+      listEl.appendChild(card);
+    });
+
+    document.getElementById('statMedicalPending').innerText = medicalRequests.filter(m => m.status === 'SUBMITTED').length + '건';
   }
 
   function renderHomeNotif() {
     const notifContainer = document.getElementById('recentNotifList');
     notifContainer.innerHTML = '';
 
-    requests.slice(0, 3).forEach(req => {
+    const recentItems = [
+      ...requests.map(r => ({ ...r, category: '출타' })),
+      ...medicalRequests.map(m => ({ id: m.id, type: '진료', user: m.user, reason: `${m.hospital} (${m.dept}) ${m.medicalType}`, category: '진료' }))
+    ].slice(0, 3);
+
+    recentItems.forEach(req => {
       const item = document.createElement('div');
       item.className = 'notif-item';
-      item.onclick = () => { switchNav('approval'); openPopup(req.id); };
+      item.onclick = () => { 
+        if(req.category === '출타') { switchNav('approval'); openPopup(req.id); }
+        else { switchNav('hospital'); openMedicalPopup(req.id); }
+      };
       item.innerHTML = `
         <div>
           <strong style="color:var(--text);">[${req.type}] ${req.user}</strong>
@@ -429,11 +509,23 @@
 
   function filterList(filterType) {
     currentFilter = filterType;
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    if(event && event.target && event.target.classList) event.target.classList.add('active');
+    if(event && event.target && event.target.classList) {
+      event.target.parentElement.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
     renderList();
   }
 
+  function filterMedical(filterType) {
+    currentMedicalFilter = filterType;
+    if(event && event.target && event.target.classList) {
+      event.target.parentElement.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+    renderMedicalList();
+  }
+
+  /* 출타 상세 팝업 */
   function openPopup(id) {
     selectedReqId = id;
     const req = requests.find(r => r.id === id);
@@ -477,18 +569,41 @@
     document.getElementById('layerOverlay').classList.add('active');
   }
 
-  function closePopup() {
-    document.getElementById('layerOverlay').classList.remove('active');
+  function closePopup() { document.getElementById('layerOverlay').classList.remove('active'); }
+
+  /* 진료 상세 팝업 (단순 확인 처리 기능만 제공) */
+  function openMedicalPopup(id) {
+    selectedMedicalId = id;
+    const med = medicalRequests.find(m => m.id === id);
+    if(!med) return;
+
+    document.getElementById('medUser').innerText = med.user;
+    document.getElementById('medCode').innerText = med.code;
+    document.getElementById('medMedicalType').innerText = med.medicalType;
+    document.getElementById('medHospital').innerText = med.hospital;
+    document.getElementById('medDept').innerText = med.dept;
+    document.getElementById('medDate').innerText = med.date;
+    document.getElementById('medSymptom').innerText = med.symptom;
+    document.getElementById('medStatus').innerText = med.status === 'SUBMITTED' ? '확인 대기 중' : '간부 확인 완료';
+
+    const confirmBtn = document.getElementById('medConfirmBtn');
+    if(med.status === 'SUBMITTED') {
+      confirmBtn.style.display = 'block';
+    } else {
+      confirmBtn.style.display = 'none';
+    }
+
+    document.getElementById('medicalLayerOverlay').classList.add('active');
   }
+
+  function closeMedicalPopup() { document.getElementById('medicalLayerOverlay').classList.remove('active'); }
 
   function openRejectPopup() {
     document.getElementById('rejectInput').value = '';
     document.getElementById('rejectOverlay').classList.add('active');
   }
 
-  function closeRejectPopup() {
-    document.getElementById('rejectOverlay').classList.remove('active');
-  }
+  function closeRejectPopup() { document.getElementById('rejectOverlay').classList.remove('active'); }
 
   function openConfirmModal(msg, actionFn) {
     document.getElementById('confirmMessage').innerText = msg;
@@ -506,6 +621,18 @@
       pendingAction();
     }
     closeConfirmPopup();
+  }
+
+  function requestMedicalConfirm() {
+    openConfirmModal('해당 용사의 진료 신청 내역을 확인 완료 처리하시겠습니까?', () => {
+      const med = medicalRequests.find(m => m.id === selectedMedicalId);
+      if(med) {
+        med.status = 'CONFIRMED';
+      }
+      closeMedicalPopup();
+      renderMedicalList();
+      renderHomeNotif();
+    });
   }
 
   function requestRejectConfirm() {
