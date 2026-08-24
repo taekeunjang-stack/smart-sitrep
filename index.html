@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>전술 디지털 상황판 (SitRep)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 메인 지도 -->
+  <div id="map"></div>
+
+  <!-- 대시보드 오버레이 패널 -->
+  <div id="control-panel">
+    <div class="panel-header">
+      <h2>TACTICAL SITREP</h2>
+      <span class="status-badge" id="system-status">STANDBY</span>
+    </div>
+
+    <div class="scenario-controls">
+      <button class="btn btn-primary" onclick="startScenario()">▶ Play</button>
+      <button class="btn btn-warning" onclick="pauseScenario()">❚❚ Pause</button>
+      <button class="btn btn-danger" onclick="resetScenario()">↺ Reset</button>
+    </div>
+
+    <div class="info-box">
+      <div class="info-item">
+        <span class="label">진행 시간</span>
+        <span class="value" id="timer">T+00s</span>
+      </div>
+      <div class="info-item">
+        <span class="label">상태 로그</span>
+        <span class="value log" id="log-text">시나리오 대기 중...</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
