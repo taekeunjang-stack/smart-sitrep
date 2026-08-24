@@ -20,14 +20,14 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
     body { background-color: #020617; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
 
-    /* 갤럭시 스타일 프레임 (각진 모서리, 슬림 베젤) */
+    /* 갤럭시 스타일 프레임 */
     .galaxy-device {
       width: 100%;
-      max-width: 412px; /* 갤럭시 S 시리즈 표준 폭 */
+      max-width: 412px;
       height: 880px;
       max-height: 96vh;
       background-color: var(--bg);
-      border-radius: 12px; /* 갤럭시 특유의 약간 각진 라운드 */
+      border-radius: 12px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
       border: 4px solid #1e293b;
       display: flex;
@@ -36,21 +36,12 @@
       position: relative;
     }
 
-    /* 갤럭시 펀치홀 카메라 및 상태바 */
     .galaxy-punchhole {
-      width: 12px;
-      height: 12px;
-      background-color: #000;
-      border-radius: 50%;
-      position: absolute;
-      top: 6px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 100;
+      width: 12px; height: 12px; background-color: #000; border-radius: 50%;
+      position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 100;
     }
     .status-bar { height: 28px; background: white; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; font-size: 11px; font-weight: 600; color: #334155; }
 
-    /* 권한 스위처 및 헤더 */
     .role-switcher { background: #0f172a; color: white; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
     .role-switcher select { background: #1e293b; color: white; border: 1px solid #334155; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
 
@@ -59,19 +50,16 @@
 
     .content-area { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 70px; }
     
-    /* 알림 바너 */
     .notification-banner {
       background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;
       display: flex; align-items: center; justify-content: space-between; cursor: pointer; animation: pulse 2s infinite;
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
 
-    /* 필터 탭 */
     .filter-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
     .tab-btn { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; white-space: nowrap; }
     .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
 
-    /* 리스트 카드 */
     .req-card { background: white; border-radius: 6px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
     .req-card:active { background-color: #f1f5f9; }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -81,7 +69,7 @@
     .badge-success { background: #d1fae5; color: #065f46; }
     .badge-reject { background: #fee2e2; color: #991b1b; }
 
-    /* 모바일 중앙 레이어 팝업 (Layer Popup) */
+    /* 모바일 레이어 팝업 공통 스타일 */
     .layer-overlay {
       position: absolute; inset: 0; background: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 200; padding: 16px;
@@ -102,10 +90,10 @@
 
     .popup-footer { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; gap: 8px; }
     .btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .btn-cancel { background: #f1f5f9; color: #475569; border: 1px solid var(--border); }
     .btn-reject { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
     .btn-approve { background: var(--primary); color: white; }
 
-    /* 하단 네비게이션 */
     .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 56px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #64748b; cursor: pointer; }
     .nav-item.active { color: var(--primary); font-weight: bold; }
@@ -121,7 +109,6 @@
     <div><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-signal"></i> <i class="fa-solid fa-battery-three-quarters"></i></div>
   </div>
 
-  <!-- Role Selector -->
   <div class="role-switcher">
     <span><i class="fa-solid fa-user-gear"></i> 시연 권한:</span>
     <select id="roleSelect" onchange="changeRole()">
@@ -155,7 +142,7 @@
     <div id="requestList"></div>
   </div>
 
-  <!-- 레이어 팝업 (Layer Popup) 모달 구조 -->
+  <!-- 1차 상세 레이어 팝업 -->
   <div class="layer-overlay" id="layerOverlay">
     <div class="layer-popup">
       <div class="popup-header">
@@ -180,13 +167,32 @@
       </div>
 
       <div class="popup-footer" id="actionBtnGroup">
-        <button class="btn btn-reject" onclick="processAction('REJECT')">반려 처리</button>
+        <button class="btn btn-reject" onclick="openRejectPopup()">반려 처리</button>
         <button class="btn btn-approve" id="approveBtnText" onclick="processAction('APPROVE')">상신 처리</button>
       </div>
     </div>
   </div>
 
-  <!-- 갤럭시 스타일 하단 3버튼 네비게이션 -->
+  <!-- 2차 반려 사유 입력 레이어 팝업 -->
+  <div class="layer-overlay" id="rejectOverlay" style="z-index: 300;">
+    <div class="layer-popup">
+      <div class="popup-header">
+        <h3 style="font-size: 14px; font-weight: bold; color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> 반려 사유 입력</h3>
+        <i class="fa-solid fa-xmark" onclick="closeRejectPopup()" style="cursor:pointer; font-size: 16px; color: #64748b;"></i>
+      </div>
+      
+      <div class="popup-body">
+        <p style="font-size: 12px; color: #475569; margin-bottom: 8px;">신청자(용사)에게 전달될 반려 사유를 입력하세요.</p>
+        <textarea id="rejectInput" rows="4" style="width:100%; border:1px solid var(--border); border-radius:4px; padding:8px; font-size:12px; resize:none;" placeholder="예: 부대 훈련 일정과 중복되어 반려 처리함"></textarea>
+      </div>
+
+      <div class="popup-footer">
+        <button class="btn btn-cancel" onclick="closeRejectPopup()">취소</button>
+        <button class="btn btn-reject" onclick="confirmReject()">반려 확정</button>
+      </div>
+    </div>
+  </div>
+
   <div class="bottom-nav">
     <div class="nav-item"><i class="fa-solid fa-house"></i>Home</div>
     <div class="nav-item active"><i class="fa-solid fa-file-signature"></i>출타결재</div>
@@ -314,24 +320,43 @@
     document.getElementById('layerOverlay').classList.remove('active');
   }
 
+  /* 반려 레이어 팝업 제어 */
+  function openRejectPopup() {
+    document.getElementById('rejectInput').value = '';
+    document.getElementById('rejectOverlay').classList.add('active');
+  }
+
+  function closeRejectPopup() {
+    document.getElementById('rejectOverlay').classList.remove('active');
+  }
+
+  function confirmReject() {
+    const reasonText = document.getElementById('rejectInput').value.trim();
+    if(!reasonText) {
+      alert('반려 사유를 입력해 주세요.');
+      return;
+    }
+
+    const req = requests.find(r => r.id === selectedReqId);
+    if(req) {
+      req.status = 'REJECT';
+      req.rejectReason = reasonText;
+    }
+
+    closeRejectPopup();
+    closePopup();
+    renderList();
+  }
+
   function processAction(actionType) {
     const req = requests.find(r => r.id === selectedReqId);
     if(!req) return;
 
-    if(actionType === 'REJECT') {
-      const reason = prompt('반려 사유를 입력하세요:', '부대 훈련 일정과 중복');
-      if(reason !== null) {
-        req.status = 'REJECT';
-        req.rejectReason = reason;
-        alert('반려 처리가 완료되었습니다.');
-      }
-    } else if(actionType === 'APPROVE') {
+    if(actionType === 'APPROVE') {
       if(currentRole === 'ADMIN') {
         req.status = 'APPROVAL';
-        alert('지휘관(중대장)에게 결재 상신이 완료되었습니다.');
       } else if(currentRole === 'COMMANDER') {
         req.status = 'SUCCESS';
-        alert('최종 승인이 완료되었습니다.');
       }
     }
     closePopup();
