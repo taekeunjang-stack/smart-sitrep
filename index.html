@@ -1,43 +1,473 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>전술 디지털 상황판 (SitRep)</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스마트부대 모바일 시연 시스템</title>
+  <!-- Chart.js CDN for Dashboards -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #1b4998;
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #e2e8f0;
+      --danger-color: #e53e3e;
+      --success-color: #38a169;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #1a202c; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+
+    /* 모바일/태블릿 프레임 (반응형) */
+    .device-container {
+      width: 100%;
+      max-width: 430px;
+      height: 900px;
+      max-height: 95vh;
+      background-color: var(--bg-color);
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 8px solid #2d3748;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 상단 상태바 & 헤더 */
+    .status-bar {
+      height: 30px;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .app-header {
+      background-color: #ffffff;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .app-header h2 { font-size: 18px; color: #1a202c; }
+    .user-profile-bar {
+      background: linear-gradient(135deg, #1b4998, #0f2b5c);
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 메인 콘텐츠 영역 */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 70px;
+    }
+
+    .view-page { display: none; padding: 12px; }
+    .view-page.active { display: block; }
+
+    /* 카드가 통합 디자인 */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+    /* 로그인 전용 디자인 */
+    .login-container {
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      height: 100%;
+      color: white;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+    .login-input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #334155;
+      color: white;
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    /* 메뉴 아이콘 그리드 */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .menu-btn {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* GIS 지도 Mockup */
+    .gis-map {
+      height: 600px;
+      background: #242f3e;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      background-image: radial-gradient(#3a4b60 1px, transparent 0);
+      background-size: 20px 20px;
+    }
+    .gis-marker {
+      position: absolute;
+      padding: 6px 10px;
+      border-radius: 20px;
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+    .marker-blue { background: #2563eb; }
+    .marker-red { background: #dc2626; }
+    .marker-purple { background: #7c3aed; }
+
+    /* 하단 탭 바 */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 65px;
+      background: white;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 11px;
+      color: #64748b;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .nav-item.active { color: var(--primary-color); font-weight: bold; }
+    .nav-item i { font-size: 18px; margin-bottom: 3px; }
+
+    /* 챗봇 플로팅 버튼 */
+    .chatbot-fab {
+      width: 50px;
+      height: 50px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 20px;
+      box-shadow: 0 4px 10px rgba(37,99,235,0.4);
+      margin-top: -25px;
+      border: 3px solid white;
+    }
+
+    /* 바텀 시트 (상세 정보 팝업) */
+    .bottom-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      box-shadow: 0 -5px 25px rgba(0,0,0,0.2);
+      transform: translateY(100%);
+      transition: transform 0.3s ease-out;
+      z-index: 100;
+    }
+    .bottom-sheet.open { transform: translateY(0); }
+    .sheet-handle { width: 40px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 15px; }
+
+    /* 태블릿 가로 확장 지원 */
+    @media (min-width: 768px) {
+      .device-container { max-width: 850px; height: 90vh; }
+      .grid-2-tablet { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- 메인 지도 -->
-  <div id="map"></div>
-
-  <!-- 대시보드 오버레이 패널 -->
-  <div id="control-panel">
-    <div class="panel-header">
-      <h2>TACTICAL SITREP</h2>
-      <span class="status-badge" id="system-status">STANDBY</span>
+<div class="device-container">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>09:30</span>
+    <div>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
     </div>
+  </div>
 
-    <div class="scenario-controls">
-      <button class="btn btn-primary" onclick="startScenario()">▶ Play</button>
-      <button class="btn btn-warning" onclick="pauseScenario()">❚❚ Pause</button>
-      <button class="btn btn-danger" onclick="resetScenario()">↺ Reset</button>
+  <!-- Page 0: Login -->
+  <div id="page-login" class="view-page active" style="padding:0; height:100%;">
+    <div class="login-container">
+      <i class="fa-solid fa-shield-halved" style="font-size: 48px; color: #3b82f6; margin-bottom: 15px;"></i>
+      <h2 style="font-size:22px;">대한민국육군</h2>
+      <h3 style="font-size:26px; margin-bottom:30px;">스마트부대 모바일</h3>
+      <input type="text" class="login-input" placeholder="군번을 입력해주세요." value="19-506547">
+      <input type="password" class="login-input" placeholder="비밀번호를 입력해주세요." value="••••••••">
+      <button class="btn-primary" onclick="navigateTo('page-home')">로그인</button>
+      <p style="margin-top:40px; font-size:11px; color:#64748b;">© 2026. 대한민국육군. All rights reserved.</p>
     </div>
+  </div>
 
-    <div class="info-box">
-      <div class="info-item">
-        <span class="label">진행 시간</span>
-        <span class="value" id="timer">T+00s</span>
+  <!-- Page 1: Home Dashboard -->
+  <div id="page-home" class="view-page">
+    <div class="user-profile-bar">
+      <div>
+        <div style="font-size: 12px; opacity:0.8;">19-506547</div>
+        <div style="font-size: 18px; font-weight:bold;">상사 김도윤</div>
+        <div style="font-size: 11px; opacity:0.8;">군수사령부 / 정보작전처</div>
       </div>
-      <div class="info-item">
-        <span class="label">상태 로그</span>
-        <span class="value log" id="log-text">시나리오 대기 중...</span>
+      <i class="fa-solid fa-right-from-bracket" onclick="navigateTo('page-login')" style="cursor:pointer;"></i>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:bold; font-size:14px; margin-bottom:10px;">알림현황 <span style="color:#e53e3e; font-size:12px;">총 7건</span></div>
+      <div class="grid-3" style="text-align:center;">
+        <div style="background:#fff5f5; padding:10px; border-radius:8px;">
+          <div style="font-size:18px; font-weight:bold; color:#e53e3e;">2건</div>
+          <div style="font-size:11px; color:#666;">미확인 알림</div>
+        </div>
+        <div style="background:#f7fafc; padding:10px; border-radius:8px;">
+          <div style="font-size:18px; font-weight:bold; color:#2d3748;">1건</div>
+          <div style="font-size:11px; color:#666;">금일 훈련</div>
+        </div>
+        <div style="background:#f7fafc; padding:10px; border-radius:8px;">
+          <div style="font-size:18px; font-weight:bold; color:#2d3748;">4건</div>
+          <div style="font-size:11px; color:#666;">출타승인</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:bold; font-size:14px; margin-bottom:10px;">전체 메뉴</div>
+      <div class="menu-grid">
+        <div class="menu-btn" onclick="navigateTo('page-notice')"><i class="fa-solid fa-bell" style="color:#3b82f6;"></i> 알림</div>
+        <div class="menu-btn" onclick="navigateTo('page-action')"><i class="fa-solid fa-bolt" style="color:#eab308;"></i> 초동조치</div>
+        <div class="menu-btn" onclick="navigateTo('page-leave')"><i class="fa-solid fa-user-check" style="color:#10b981;"></i> 출타결재</div>
+        <div class="menu-btn" onclick="navigateTo('page-medical')"><i class="fa-solid fa-hospital" style="color:#ef4444;"></i> 진료확인</div>
+        <div class="menu-btn" onclick="navigateTo('page-personnel')"><i class="fa-solid fa-users" style="color:#6366f1;"></i> 병력현황</div>
+        <div class="menu-btn" onclick="navigateTo('page-arms')"><i class="fa-solid fa-shield" style="color:#8b5cf6;"></i> 총기/탄약</div>
       </div>
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="script.js"></script>
+  <!-- Page 2: 가. GIS 기반 디지털 상황판 (ATAK 핵심) -->
+  <div id="page-gis" class="view-page">
+    <div class="app-header">
+      <h2><i class="fa-solid fa-map-location-dot" style="color:#2563eb;"></i> GIS 디지털 상황판</h2>
+      <div>
+        <button style="padding:4px 8px; font-size:11px; background:#e2e8f0; border:none; border-radius:4px;">작전</button>
+        <button style="padding:4px 8px; font-size:11px; background:#2563eb; color:white; border:none; border-radius:4px;">차량</button>
+      </div>
+    </div>
+    
+    <div class="gis-map" id="gis-map-area">
+      <!-- Blue Force Markers -->
+      <div class="gis-marker marker-blue" style="top: 30%; left: 40%;" onclick="openBottomSheet('차량 [07보1234]', '수기사단 이동 중 (GPS 정상)')">
+        <i class="fa-solid fa-truck-front"></i> 07보1234
+      </div>
+      <div class="gis-marker marker-blue" style="top: 65%; left: 55%;" onclick="openBottomSheet('차량 [12수5678]', '제3기갑여단 정지 상태')">
+        <i class="fa-solid fa-truck-front"></i> 12수5678
+      </div>
+
+      <!-- Red Force / Incidents Markers -->
+      <div class="gis-marker marker-red" style="top: 20%; left: 50%;" onclick="openBottomSheet('[작전] 매복 작전·독수리작전', '경계 태세 강화 구역 발령 중')">
+        <i class="fa-solid fa-crosshairs"></i> 작전
+      </div>
+      <div class="gis-marker marker-red" style="top: 45%; left: 25%;" onclick="openBottomSheet('[초동조치] 충무작전', '의심 물체 신고에 따른 긴급 출동')">
+        <i class="fa-solid fa-triangle-exclamation"></i> 작전
+      </div>
+
+      <!-- Purple Infrastructure / Asset Markers -->
+      <div class="gis-marker marker-purple" style="top: 35%; left: 65%;" onclick="openBottomSheet('[BMTS] 03포2468', '통신 중계 차량 연동 완료')">
+        <i class="fa-solid fa-radio"></i> 03포2468
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: 초동조치 (시나리오 연동) -->
+  <div id="page-action" class="view-page">
+    <div class="app-header"><h2>초동조치 현황</h2></div>
+    <div class="card" onclick="openBottomSheet('[긴급] 오물풍선 투입 지시', '상황전파 완료 -> 현장 출발 대기 중')">
+      <div style="display:flex; justify-content:space-between;">
+        <span style="color:#e53e3e; font-size:12px; font-weight:bold;">[긴급] 이벤트 발생</span>
+        <span style="font-size:11px; color:#888;">11:27:11</span>
+      </div>
+      <div style="font-weight:bold; margin-top:5px;">#4. 오물풍선/긴급조치반 투입 지시</div>
+      <div style="margin-top:10px; font-size:12px; color:#4a5568;">상황전파 ➔ 출발 ➔ 도착 ➔ 조치</div>
+    </div>
+  </div>
+
+  <!-- Page 4: 출타승인 -->
+  <div id="page-leave" class="view-page">
+    <div class="app-header"><h2>출타 승인 관리</h2></div>
+    <div class="card" onclick="openBottomSheet('출타신청 상세정보', '일등병 홍길동 / 외출 / 부산광역시 남구')">
+      <div style="display:flex; justify-content:space-between;">
+        <span style="font-weight:bold;">(외출) 일등병 홍길동</span>
+        <span style="background:#feebc8; color:#744210; padding:2px 6px; font-size:11px; border-radius:4px;">결재대기</span>
+      </div>
+      <div style="font-size:12px; color:#666; margin-top:5px;">신청일: 2026.06.06</div>
+    </div>
+  </div>
+
+  <!-- Page 5: 병력 현황 대시보드 -->
+  <div id="page-personnel" class="view-page">
+    <div class="app-header"><h2>병력 현황</h2></div>
+    <div class="card grid-3" style="text-align:center;">
+      <div>총원<br><strong>120명</strong></div>
+      <div style="color:#e53e3e;">열외<br><strong>18명</strong></div>
+      <div style="color:#38a169;">현재원<br><strong>102명</strong></div>
+    </div>
+    <div class="card">
+      <canvas id="personnelChart" style="max-height:200px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Page 6: 총기/탄약 현황 대시보드 -->
+  <div id="page-arms" class="view-page">
+    <div class="app-header"><h2>총기 및 탄약 현황</h2></div>
+    <div class="card grid-3" style="text-align:center;">
+      <div>총 수량<br><strong>120정</strong></div>
+      <div style="color:#e53e3e;">불출<br><strong>8정</strong></div>
+      <div style="color:#38a169;">현재 수량<br><strong>112정</strong></div>
+    </div>
+    <div class="card">
+      <canvas id="armsChart" style="max-height:200px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="navigateTo('page-home')">
+      <i class="fa-solid fa-house"></i>Home
+    </div>
+    <div class="nav-item" onclick="navigateTo('page-action')">
+      <i class="fa-solid fa-layer-group"></i>작전
+    </div>
+    <div class="chatbot-fab" onclick="alert('스마트부대 AI 챗봇이 활성화되었습니다.')">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+    </div>
+    <div class="nav-item" onclick="navigateTo('page-gis')">
+      <i class="fa-solid fa-location-dot"></i>GIS
+    </div>
+    <div class="nav-item" onclick="navigateTo('page-personnel')">
+      <i class="fa-solid fa-chart-pie"></i>상황판
+    </div>
+  </div>
+
+  <!-- Bottom Sheet Modal for Details -->
+  <div class="bottom-sheet" id="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="sheet-title" style="margin-bottom:10px;">상세 정보</h3>
+    <p id="sheet-content" style="font-size:14px; color:#4a5568; margin-bottom:20px;">내용이 들어갑니다.</p>
+    <button class="btn-primary" style="margin-top:0;" onclick="closeBottomSheet()">확인 및 닫기</button>
+  </div>
+</div>
+
+<script>
+  // Page Navigation Control
+  function navigateTo(pageId) {
+    document.querySelectorAll('.view-page').forEach(page => page.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+
+    // Update Navigation UI status
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    if(pageId === 'page-home') document.querySelectorAll('.nav-item')[0].classList.add('active');
+    if(pageId === 'page-action') document.querySelectorAll('.nav-item')[1].classList.add('active');
+    if(pageId === 'page-gis') document.querySelectorAll('.nav-item')[2].classList.add('active');
+    if(pageId === 'page-personnel' || pageId === 'page-arms') document.querySelectorAll('.nav-item')[3].classList.add('active');
+
+    // Render Charts on navigation
+    if(pageId === 'page-personnel') renderPersonnelChart();
+    if(pageId === 'page-arms') renderArmsChart();
+  }
+
+  // Bottom Sheet Control
+  function openBottomSheet(title, content) {
+    document.getElementById('sheet-title').innerText = title;
+    document.getElementById('sheet-content').innerText = content;
+    document.getElementById('bottom-sheet').classList.add('open');
+  }
+
+  function closeBottomSheet() {
+    document.getElementById('bottom-sheet').classList.remove('open');
+  }
+
+  // Render Charts using Chart.js
+  let pChart, aChart;
+  function renderPersonnelChart() {
+    if(pChart) pChart.destroy();
+    const ctx = document.getElementById('personnelChart').getContext('2d');
+    pChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['장교(7)', '준사관(4)', '부사관(25)', '병사(66)'],
+        datasets: [{ data: [7, 4, 25, 66], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  function renderArmsChart() {
+    if(aChart) aChart.destroy();
+    const ctx = document.getElementById('armsChart').getContext('2d');
+    aChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['K1', 'K2', 'K201', 'K2-C1', 'K3', 'K16'],
+        datasets: [{ label: '보유량', data: [12, 60, 6, 20, 8, 4], backgroundColor: '#2563eb' }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
+</script>
 </body>
 </html>
