@@ -3,107 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>출타/진료 신청 결재 시연 시스템</title>
+  <title>출타/진료 신청 결재 시연 시스템 (Galaxy Style)</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --primary: #1b4998;
-      --bg: #f4f6f9;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
       --border: #e2e8f0;
-      --text: #1e293b;
+      --text: #0f172a;
       --danger: #ef4444;
       --warning: #f59e0b;
       --success: #10b981;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #0f172a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+    body { background-color: #020617; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
 
-    .device-container {
+    /* 갤럭시 스타일 프레임 (각진 모서리, 슬림 베젤) */
+    .galaxy-device {
       width: 100%;
-      max-width: 430px;
-      height: 900px;
-      max-height: 95vh;
+      max-width: 412px; /* 갤럭시 S 시리즈 표준 폭 */
+      height: 880px;
+      max-height: 96vh;
       background-color: var(--bg);
-      border-radius: 36px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      border: 8px solid #334155;
+      border-radius: 12px; /* 갤럭시 특유의 약간 각진 라운드 */
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      border: 4px solid #1e293b;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       position: relative;
     }
 
-    /* 상단 헤더 및 스위처 */
-    .status-bar { height: 24px; background: white; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; font-size: 11px; font-weight: bold; }
-    .role-switcher { background: #1e293b; color: white; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-    .role-switcher select { background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    /* 갤럭시 펀치홀 카메라 및 상태바 */
+    .galaxy-punchhole {
+      width: 12px;
+      height: 12px;
+      background-color: #000;
+      border-radius: 50%;
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
+    .status-bar { height: 28px; background: white; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; font-size: 11px; font-weight: 600; color: #334155; }
+
+    /* 권한 스위처 및 헤더 */
+    .role-switcher { background: #0f172a; color: white; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+    .role-switcher select { background: #1e293b; color: white; border: 1px solid #334155; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
 
     .app-header { background: white; padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .app-header h2 { font-size: 16px; color: var(--text); }
+    .app-header h2 { font-size: 15px; color: var(--text); }
 
     .content-area { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 70px; }
     
     /* 알림 바너 */
     .notification-banner {
-      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;
       display: flex; align-items: center; justify-content: space-between; cursor: pointer; animation: pulse 2s infinite;
     }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
 
     /* 필터 탭 */
     .filter-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
-    .tab-btn { padding: 6px 12px; font-size: 12px; border-radius: 16px; border: 1px solid var(--border); background: white; cursor: pointer; white-space: nowrap; }
+    .tab-btn { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; white-space: nowrap; }
     .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
 
     /* 리스트 카드 */
-    .req-card { background: white; border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.1s; }
-    .req-card:active { transform: scale(0.98); }
+    .req-card { background: white; border-radius: 6px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
+    .req-card:active { background-color: #f1f5f9; }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .badge { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; }
-    .badge-review { background: #fef3c7; color: #92400e; } /* 검토대기 */
-    .badge-approval { background: #dbeafe; color: #1e40af; } /* 결재대기 */
-    .badge-success { background: #d1fae5; color: #065f46; } /* 최종승인 */
-    .badge-reject { background: #fee2e2; color: #991b1b; } /* 반려 */
+    .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+    .badge-review { background: #fef3c7; color: #92400e; }
+    .badge-approval { background: #dbeafe; color: #1e40af; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-reject { background: #fee2e2; color: #991b1b; }
 
-    /* 상세 정보 모달 */
-    .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 200; }
-    .modal-overlay.active { display: flex; }
-    .modal-sheet { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 20px; max-height: 80%; overflow-y: auto; animation: slideUp 0.25s ease-out; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    /* 모바일 중앙 레이어 팝업 (Layer Popup) */
+    .layer-overlay {
+      position: absolute; inset: 0; background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 200; padding: 16px;
+    }
+    .layer-overlay.active { display: flex; }
+    .layer-popup {
+      background: white; width: 100%; max-width: 360px; border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3); overflow: hidden; animation: popIn 0.2s ease-out;
+    }
+    @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    .info-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+    .popup-header { background: #f8fafc; padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .popup-body { padding: 16px; max-height: 480px; overflow-y: auto; }
+    
+    .info-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
     .info-table th, .info-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
-    .info-table th { background: #f8fafc; color: #64748b; width: 30%; }
+    .info-table th { background: #f1f5f9; color: #475569; width: 32%; }
 
-    .btn-group { display: flex; gap: 8px; margin-top: 15px; }
-    .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
-    .btn-reject { background: #fee2e2; color: var(--danger); }
+    .popup-footer { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .btn-reject { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
     .btn-approve { background: var(--primary); color: white; }
 
-    /* 하단 탭 바 */
-    .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 60px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
+    /* 하단 네비게이션 */
+    .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 56px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #64748b; cursor: pointer; }
     .nav-item.active { color: var(--primary); font-weight: bold; }
-    .nav-item i { font-size: 16px; margin-bottom: 2px; }
-
-    @media (min-width: 768px) {
-      .device-container { max-width: 768px; height: 90vh; }
-    }
+    .nav-item i { font-size: 15px; margin-bottom: 2px; }
   </style>
 </head>
 <body>
 
-<div class="device-container">
+<div class="galaxy-device">
+  <div class="galaxy-punchhole"></div>
   <div class="status-bar">
-    <span>09:30</span>
-    <div><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-battery-full"></i></div>
+    <span>10:24</span>
+    <div><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-signal"></i> <i class="fa-solid fa-battery-three-quarters"></i></div>
   </div>
 
-  <!-- Role Selector (시연용 권한 전환) -->
+  <!-- Role Selector -->
   <div class="role-switcher">
-    <span><i class="fa-solid fa-user-shield"></i> 현재 시연 권한:</span>
+    <span><i class="fa-solid fa-user-gear"></i> 시연 권한:</span>
     <select id="roleSelect" onchange="changeRole()">
       <option value="ADMIN">행정보급관 (검토자)</option>
       <option value="COMMANDER">중대장 (최종 결재권자)</option>
@@ -116,16 +136,14 @@
   </div>
 
   <div class="content-area">
-    <!-- 실시간 알림 시뮬레이션 바너 -->
     <div class="notification-banner" id="notifBanner" onclick="handleNotificationClick()">
       <div>
         <div style="font-size: 11px; font-weight: bold; color: #1e40af;"><i class="fa-solid fa-bell"></i> 신규 출타 신청 알림</div>
-        <div style="font-size: 12px; color: #1e293b;" id="notifText">신규 출타 신청(일등병 홍길동)이 접수되었습니다.</div>
+        <div style="font-size: 12px; color: #1e293b;" id="notifText">신규 출타 신청이 접수되었습니다.</div>
       </div>
       <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: #93c5fd;"></i>
     </div>
 
-    <!-- 필터 버튼 목록 -->
     <div class="filter-tabs">
       <button class="tab-btn active" onclick="filterList('ALL')">전체</button>
       <button class="tab-btn" onclick="filterList('REVIEW')">검토대기</button>
@@ -134,40 +152,41 @@
       <button class="tab-btn" onclick="filterList('REJECT')">반려</button>
     </div>
 
-    <!-- 신청 목록 (JS 렌더링) -->
     <div id="requestList"></div>
   </div>
 
-  <!-- 상세 정보 및 결재/반려 처리 모달 -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-sheet">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size: 16px;" id="modalTitle">출타 신청 상세 정보</h3>
-        <i class="fa-solid fa-xmark" onclick="closeModal()" style="cursor:pointer;"></i>
+  <!-- 레이어 팝업 (Layer Popup) 모달 구조 -->
+  <div class="layer-overlay" id="layerOverlay">
+    <div class="layer-popup">
+      <div class="popup-header">
+        <h3 style="font-size: 14px; font-weight: bold; color: var(--text);" id="modalTitle">출타 신청 상세 정보</h3>
+        <i class="fa-solid fa-xmark" onclick="closePopup()" style="cursor:pointer; font-size: 16px; color: #64748b;"></i>
       </div>
       
-      <table class="info-table">
-        <tr><th>신청 유형</th><td id="mType">휴가</td></tr>
-        <tr><th>신청자</th><td id="mUser">일등병 홍길동 (25-912301)</td></tr>
-        <tr><th>소속</th><td>군수사령부 정보작전처</td></tr>
-        <tr><th>세부 일정</th><td id="mDate">2026.10.29 ~ 2026.10.31</td></tr>
-        <tr><th>행선지</th><td id="mDestination">부산광역시 남구</td></tr>
-        <tr><th>신청 사유</th><td id="mReason">포상휴가 신청</td></tr>
-        <tr><th>현재 상태</th><td id="mStatus">검토대기</td></tr>
-        <tr id="rejectReasonRow" style="display:none; background:#fef2f2;">
-          <th style="color:var(--danger);">반려 사유</th>
-          <td id="mRejectReason" style="color:var(--danger);"></td>
-        </tr>
-      </table>
+      <div class="popup-body">
+        <table class="info-table">
+          <tr><th>신청 유형</th><td id="mType">휴가</td></tr>
+          <tr><th>신청자</th><td id="mUser">일등병 홍길동</td></tr>
+          <tr><th>군번</th><td id="mCode">25-912301</td></tr>
+          <tr><th>세부 일정</th><td id="mDate">2026.10.29 ~ 2026.10.31</td></tr>
+          <tr><th>행선지</th><td id="mDestination">부산광역시 남구</td></tr>
+          <tr><th>신청 사유</th><td id="mReason">포상휴가 신청</td></tr>
+          <tr><th>현재 상태</th><td id="mStatus">검토대기</td></tr>
+          <tr id="rejectReasonRow" style="display:none; background:#fef2f2;">
+            <th style="color:var(--danger);">반려 사유</th>
+            <td id="mRejectReason" style="color:var(--danger); font-weight:bold;"></td>
+          </tr>
+        </table>
+      </div>
 
-      <div class="btn-group" id="actionBtnGroup">
+      <div class="popup-footer" id="actionBtnGroup">
         <button class="btn btn-reject" onclick="processAction('REJECT')">반려 처리</button>
         <button class="btn btn-approve" id="approveBtnText" onclick="processAction('APPROVE')">상신 처리</button>
       </div>
     </div>
   </div>
 
-  <!-- 하단 탭 바 -->
+  <!-- 갤럭시 스타일 하단 3버튼 네비게이션 -->
   <div class="bottom-nav">
     <div class="nav-item"><i class="fa-solid fa-house"></i>Home</div>
     <div class="nav-item active"><i class="fa-solid fa-file-signature"></i>출타결재</div>
@@ -177,7 +196,6 @@
 </div>
 
 <script>
-  // 샘플 데이터 데이터베이스
   let requests = [
     { id: 82, type: '외출', user: '일등병 홍길동', code: '25-912301', date: '2026.06.06 (09:00~18:00)', dest: '부산광역시 남구', reason: '포상외출', status: 'REVIEW', rejectReason: '' },
     { id: 81, type: '휴가', user: '상등병 임꺽정', code: '25-710239', date: '2026.07.01 ~ 2026.07.05', dest: '서울특별시 마포구', reason: '정기휴가', status: 'APPROVAL', rejectReason: '' },
@@ -185,7 +203,7 @@
     { id: 79, type: '진료', user: '일등병 이몽룡', code: '25-992101', date: '2026.06.08', dest: '수도병원 내과', reason: '감기 몸살 진료', status: 'REJECT', rejectReason: '부대 훈련 일정과 중복' }
   ];
 
-  let currentRole = 'ADMIN'; // ADMIN(행보관), COMMANDER(중대장), USER(용사)
+  let currentRole = 'ADMIN';
   let currentFilter = 'ALL';
   let selectedReqId = null;
 
@@ -213,13 +231,10 @@
     const listEl = document.getElementById('requestList');
     listEl.innerHTML = '';
 
-    const filtered = requests.filter(r => {
-      if(currentFilter === 'ALL') return true;
-      return r.status === currentFilter;
-    });
+    const filtered = requests.filter(r => currentFilter === 'ALL' || r.status === currentFilter);
 
     if(filtered.length === 0) {
-      listEl.innerHTML = `<div style="text-align:center; color:#888; padding:30px;">해당 항목이 없습니다.</div>`;
+      listEl.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:30px; font-size:12px;">해당 항목이 없습니다.</div>`;
       return;
     }
 
@@ -232,14 +247,14 @@
 
       const card = document.createElement('div');
       card.className = 'req-card';
-      card.onclick = () => openModal(item.id);
+      card.onclick = () => openPopup(item.id);
       card.innerHTML = `
         <div class="card-header">
-          <strong style="font-size:14px;">(${item.type}) ${item.user}</strong>
+          <strong style="font-size:13px; color:#0f172a;">(${item.type}) ${item.user}</strong>
           ${badgeHtml}
         </div>
-        <div style="font-size:12px; color:#64748b;">일정: ${item.date}</div>
-        <div style="font-size:12px; color:#64748b;">사유: ${item.reason}</div>
+        <div style="font-size:11px; color:#64748b;">일정: ${item.date}</div>
+        <div style="font-size:11px; color:#64748b;">사유: ${item.reason}</div>
       `;
       listEl.appendChild(card);
     });
@@ -252,13 +267,14 @@
     renderList();
   }
 
-  function openModal(id) {
+  function openPopup(id) {
     selectedReqId = id;
     const req = requests.find(r => r.id === id);
     if(!req) return;
 
     document.getElementById('mType').innerText = req.type;
-    document.getElementById('mUser').innerText = `${req.user} (${req.code})`;
+    document.getElementById('mUser').innerText = req.user;
+    document.getElementById('mCode').innerText = req.code;
     document.getElementById('mDate').innerText = req.date;
     document.getElementById('mDestination').innerText = req.dest;
     document.getElementById('mReason').innerText = req.reason;
@@ -267,7 +283,6 @@
     const approveBtn = document.getElementById('approveBtnText');
     const rejectRow = document.getElementById('rejectReasonRow');
 
-    // 상태 표시
     let statusTxt = '';
     if(req.status === 'REVIEW') statusTxt = '행정보급관 검토 대기 중';
     if(req.status === 'APPROVAL') statusTxt = '중대장 결재 대기 중';
@@ -275,7 +290,6 @@
     if(req.status === 'REJECT') statusTxt = '반려 처리됨';
     document.getElementById('mStatus').innerText = statusTxt;
 
-    // 반려 사유 노출
     if(req.status === 'REJECT') {
       rejectRow.style.display = 'table-row';
       document.getElementById('mRejectReason').innerText = req.rejectReason || '사유 미기재';
@@ -283,7 +297,6 @@
       rejectRow.style.display = 'none';
     }
 
-    // 권한별 버튼 액션 및 제어
     if(currentRole === 'ADMIN' && req.status === 'REVIEW') {
       actionGroup.style.display = 'flex';
       approveBtn.innerText = '검토 후 결재 상신';
@@ -291,14 +304,14 @@
       actionGroup.style.display = 'flex';
       approveBtn.innerText = '최종 결재 승인';
     } else {
-      actionGroup.style.display = 'none'; // 처리 권한 없음 또는 이미 완료된 항목
+      actionGroup.style.display = 'none';
     }
 
-    document.getElementById('modalOverlay').classList.add('active');
+    document.getElementById('layerOverlay').classList.add('active');
   }
 
-  function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('active');
+  function closePopup() {
+    document.getElementById('layerOverlay').classList.remove('active');
   }
 
   function processAction(actionType) {
@@ -306,22 +319,22 @@
     if(!req) return;
 
     if(actionType === 'REJECT') {
-      const reason = prompt('반려 사유를 입력하세요:', '부대 사정으로 인한 불가');
+      const reason = prompt('반려 사유를 입력하세요:', '부대 훈련 일정과 중복');
       if(reason !== null) {
         req.status = 'REJECT';
         req.rejectReason = reason;
-        alert('반려 처리가 완료되었습니다. 신청자(용사)에게 알림이 전파됩니다.');
+        alert('반려 처리가 완료되었습니다.');
       }
     } else if(actionType === 'APPROVE') {
       if(currentRole === 'ADMIN') {
         req.status = 'APPROVAL';
-        alert('중대장님께 결재 상신이 완료되었습니다.');
+        alert('지휘관(중대장)에게 결재 상신이 완료되었습니다.');
       } else if(currentRole === 'COMMANDER') {
         req.status = 'SUCCESS';
-        alert('최종 결재 승인이 완료되었습니다.');
+        alert('최종 승인이 완료되었습니다.');
       }
     }
-    closeModal();
+    closePopup();
     renderList();
   }
 
@@ -330,7 +343,6 @@
     if(currentRole === 'COMMANDER') filterList('APPROVAL');
   }
 
-  // 초기화
   changeRole();
 </script>
 </body>
