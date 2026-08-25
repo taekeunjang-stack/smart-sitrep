@@ -1,0 +1,49 @@
+# Netlify 배포 설정
+# ---------------------------------------------------------------------------
+# 빌드 과정이 없는 정적 사이트다. 루트를 그대로 게시한다.
+# (git 연동 배포 시에만 build 섹션이 동작한다. 드래그&드롭 배포는 build 를 건너뛴다)
+
+[build]
+  publish = "."
+  command = ""
+
+# ---------------------------------------------------------------------------
+# 캐시 정책
+#  · 자주 고치는 앱 파일(html/css/js)은 항상 최신을 받도록 no-cache
+#  · 참고 원본 자산(폰트·아이콘·지도)과 사진은 바뀌지 않으므로 길게 캐시
+# ---------------------------------------------------------------------------
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/smart.biz.code/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 폰트는 교차 출처로 불릴 수 있으므로 CORS 허용
+[[headers]]
+  for = "/smart.biz.code/static/fonts/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  for = "/smart.biz.code/static/vendor/icons/blueprint/lib/css/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"

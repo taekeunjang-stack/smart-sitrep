@@ -43,14 +43,14 @@
     <!-- 헤더 영역 -->
     <header class="app-header">
       <div class="header-left">
-        <h1 id="headerTitle"><i class="bp-icon bp-icon-home" aria-hidden="true"></i> Smart Unit 지휘결재</h1>
+        <h1 id="headerTitle"><span class="brand-mark" aria-hidden="true"></span> 스마트부대</h1>
       </div>
       <div class="header-right">
-        <label class="sr-only" for="roleSelect">시연 권한 선택</label>
-        <select id="roleSelect" onchange="changeRole()" class="role-select">
-          <option value="ADMIN">행정보급관 (검토)</option>
-          <option value="COMMANDER">중대장 (결재)</option>
-        </select>
+        <!-- 현재 권한 표시(읽기 전용). 전환은 권한이 실제로 갈리는 출타 결재 화면에서만 한다 -->
+        <span class="role-badge" id="roleBadge">
+          <i class="bp-icon bp-icon-shield" aria-hidden="true"></i>
+          <span id="roleBadgeText">행정보급관</span>
+        </span>
       </div>
     </header>
 
@@ -61,8 +61,11 @@
       <section id="viewHome" class="view-page active">
         <div class="welcome-card">
           <div class="user-info">
-            <strong id="welcomeText">충성! 행정보급관님</strong>
-            <p id="welcomeSub">용사 출타 검토 및 미니상황판을 관리합니다.</p>
+            <span class="welcome-role" id="welcomeRole">
+              <i class="bp-icon bp-icon-shield" aria-hidden="true"></i> 행정보급관
+            </span>
+            <strong id="welcomeText">상사 김도윤</strong>
+            <p id="welcomeSub">제31보병사단 제103연대 3대대 9중대</p>
           </div>
         </div>
 
@@ -109,66 +112,70 @@
           </button>
         </div>
 
-        <!-- 비상 상황 시뮬레이터 -->
-        <div class="section-title">
-          <span><i class="bp-icon bp-icon-warning-sign" style="color:var(--app-alert)" aria-hidden="true"></i> 비상 상황 테스트 시뮬레이터</span>
-        </div>
-        <div class="sim-btn-grid">
-          <button class="sim-btn btn-suspect" type="button" onclick="triggerEvent('SUSPECT')"><i class="bp-icon bp-icon-person" aria-hidden="true"></i> 거수자 식별</button>
-          <button class="sim-btn btn-medical" type="button" onclick="triggerEvent('MEDICAL')"><i class="bp-icon bp-icon-diagnosis" aria-hidden="true"></i> 응급환자 발생</button>
-          <button class="sim-btn btn-fire" type="button" onclick="triggerEvent('FIRE')"><i class="bp-icon bp-icon-fuel" aria-hidden="true"></i> 유류고 화재</button>
-        </div>
-
-        <!-- RAG 기반 AI 현장 분석 시뮬레이션 실행 제어부 -->
-        <div class="section-title">
-          <span><i class="bp-icon bp-icon-ai" style="color:var(--app-primary)" aria-hidden="true"></i> RAG 기반 AI 현장 분석</span>
-        </div>
-        <div class="rag-simulation-control">
-          <label class="sr-only" for="scenarioSelect">분석 시나리오 선택</label>
-          <select id="scenarioSelect" onchange="onScenarioChange()">
-            <option value="SCN-001">시나리오 1: 대공혐의점 유실물 분석</option>
-            <option value="SCN-002">시나리오 2: 국가중요시설 드론 침입 분석</option>
-            <option value="SCN-003">시나리오 3: 다중이용시설 의심 방치물 분석</option>
-            <option value="SCN-004">시나리오 4: 서해안 부유물 표류 분석</option>
-            <option value="SCN-005">시나리오 5: 군사보호구역 불법 통신장비 분석</option>
-          </select>
-          <!-- 현장 사진 첨부 (분석 전 단계) -->
-          <div class="rag-attach" id="ragAttach">
-            <div class="rag-attach-thumb" id="ragAttachThumb">
-              <i class="bp-icon bp-icon-presentation" aria-hidden="true"></i>
-            </div>
-            <div class="rag-attach-info">
-              <p class="rag-attach-title" id="ragAttachTitle">현장 사진 미첨부</p>
-              <p class="rag-attach-desc" id="ragAttachDesc">촬영된 현장 사진을 확인하고 첨부하세요.</p>
-            </div>
-            <button class="btn rag-attach-btn" type="button" onclick="openRagAttach()">
-              <i class="bp-icon bp-icon-clip" aria-hidden="true"></i> 첨부
-            </button>
-          </div>
-
-          <div class="rag-btn-row">
-            <button id="btnStartSimulation" type="button" onclick="runSimulation()">
-              <i class="bp-icon bp-icon-predictive-analysis" aria-hidden="true"></i> 시뮬레이션 시작
-            </button>
-            <button id="btnRagReports" class="btn" type="button" onclick="switchNav('ragReport')">
-              <i class="bp-icon bp-icon-clipboard" aria-hidden="true"></i> 분석 결과
-              <span id="ragCountBadge" class="rag-count-badge">0</span>
-            </button>
-          </div>
-        </div>
-
         <!-- 최근 결재 안건 -->
         <div class="section-title">
           <span><i class="bp-icon bp-icon-notifications" style="color:var(--app-primary)" aria-hidden="true"></i> 최근 결재 및 신청 안건</span>
         </div>
         <div id="recentNotifList" class="notif-list"></div>
+
+        <!--
+          시연 도구 (기본 접힘)
+          실제 업무 기능이 아니라 시연 중 상황을 일으키는 장치라서
+          홈 화면의 큰 자리를 차지하지 않도록 접이식으로 내렸다. (사용자 요청 2026-08-25)
+        -->
+        <details class="demo-tools" id="demoTools">
+          <summary class="demo-tools-sum">
+            <span class="demo-tools-title"><i class="bp-icon bp-icon-cog" aria-hidden="true"></i> 시연 도구</span>
+            <span class="demo-tools-hint">상황 발생</span>
+            <i class="demo-tools-caret bp-icon bp-icon-chevron-down" aria-hidden="true"></i>
+          </summary>
+          <div class="demo-tools-body">
+            <p class="demo-tools-desc">실제 업무 기능이 아니라, 시연 중 초동조치 상황을 일으키기 위한 도구입니다.</p>
+            <div class="sim-btn-grid">
+              <button class="sim-btn btn-suspect" type="button" onclick="triggerEvent('SUSPECT')"><i class="bp-icon bp-icon-person" aria-hidden="true"></i> 거수자 식별</button>
+              <button class="sim-btn btn-medical" type="button" onclick="triggerEvent('MEDICAL')"><i class="bp-icon bp-icon-diagnosis" aria-hidden="true"></i> 응급환자 발생</button>
+              <button class="sim-btn btn-fire" type="button" onclick="triggerEvent('FIRE')"><i class="bp-icon bp-icon-fuel" aria-hidden="true"></i> 유류고 화재</button>
+            </div>
+          </div>
+        </details>
       </section>
 
       <!-- PAGE 2: 용사 출타 검토 및 결재 -->
       <section id="viewApproval" class="view-page">
+        <!--
+          결재선 + 권한 전환
+          출타 결재는 행정보급관 → 중대장 2단계로 갈리는 유일한 업무다.
+          권한 드롭다운을 모든 화면 상단에 띄우는 대신, 실제로 권한이 갈리는
+          이 화면에서 "결재선 어디에 서 있는지"와 함께 전환하도록 모았다.
+        -->
+        <section class="appr-flow" aria-label="출타 결재선">
+          <ol class="appr-steps">
+            <li class="appr-step is-fixed">
+              <span class="appr-step-name">신청</span>
+              <span class="appr-step-who">용사</span>
+            </li>
+            <li class="appr-step" id="apprStepAdmin">
+              <span class="appr-step-name">검토 <span class="appr-step-cnt" id="apprCntAdmin">0</span></span>
+              <span class="appr-step-who">행정보급관</span>
+            </li>
+            <li class="appr-step" id="apprStepCmd">
+              <span class="appr-step-name">승인 <span class="appr-step-cnt" id="apprCntCmd">0</span></span>
+              <span class="appr-step-who">중대장</span>
+            </li>
+          </ol>
+
+          <div class="appr-role">
+            <span class="appr-role-label"><i class="bp-icon bp-icon-shield" aria-hidden="true"></i> 내 권한</span>
+            <div class="appr-role-seg" role="group" aria-label="권한 전환">
+              <button class="appr-role-btn is-on" type="button" data-role="ADMIN" aria-pressed="true">행정보급관</button>
+              <button class="appr-role-btn" type="button" data-role="COMMANDER" aria-pressed="false">중대장</button>
+            </div>
+          </div>
+        </section>
+
         <div class="stat-summary">
           <div class="stat-box">
-            <span>검토 대기</span>
+            <span id="statReviewLabel">내 검토 대기</span>
             <strong id="statReview">0건</strong>
           </div>
         </div>
@@ -317,6 +324,39 @@
 
       <!-- PAGE 6: RAG 기반 AI 현장 분석 결과 -->
       <section id="viewRagReport" class="view-page">
+        <!--
+          RAG 실행부 — 홈에서 이곳으로 옮겼다.
+          AI 현장 분석은 이 화면에서 실행하고 결과까지 확인하는 구조가 자연스럽다.
+        -->
+        <div class="rag-simulation-control">
+          <label class="sr-only" for="scenarioSelect">분석 시나리오 선택</label>
+          <select id="scenarioSelect" onchange="onScenarioChange()">
+            <option value="SCN-001">시나리오 1: 대공혐의점 유실물 분석</option>
+            <option value="SCN-002">시나리오 2: 국가중요시설 드론 침입 분석</option>
+            <option value="SCN-003">시나리오 3: 다중이용시설 의심 방치물 분석</option>
+            <option value="SCN-004">시나리오 4: 서해안 부유물 표류 분석</option>
+            <option value="SCN-005">시나리오 5: 군사보호구역 불법 통신장비 분석</option>
+          </select>
+
+          <!-- 현장 사진 첨부 (분석 전 단계) -->
+          <div class="rag-attach" id="ragAttach">
+            <div class="rag-attach-thumb" id="ragAttachThumb">
+              <i class="bp-icon bp-icon-presentation" aria-hidden="true"></i>
+            </div>
+            <div class="rag-attach-info">
+              <p class="rag-attach-title" id="ragAttachTitle">현장 사진 미첨부</p>
+              <p class="rag-attach-desc" id="ragAttachDesc">촬영된 현장 사진을 확인하고 첨부하세요.</p>
+            </div>
+            <button class="btn rag-attach-btn" type="button" onclick="openRagAttach()">
+              <i class="bp-icon bp-icon-clip" aria-hidden="true"></i> 첨부
+            </button>
+          </div>
+
+          <button id="btnStartSimulation" type="button" onclick="runSimulation()">
+            <i class="bp-icon bp-icon-predictive-analysis" aria-hidden="true"></i> AI 분석 시작
+          </button>
+        </div>
+
         <div class="stat-summary">
           <div class="stat-box">
             <span>누적 분석 건수</span>

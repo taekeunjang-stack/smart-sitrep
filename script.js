@@ -79,21 +79,68 @@ function dismissPushBanner() {
   }
 }
 
-function changeRole() {
-  currentRole = document.getElementById('roleSelect').value;
-  const welcomeText = document.getElementById('welcomeText');
-  const welcomeSub = document.getElementById('welcomeSub');
+/* ---------------------------------------------------------------------------
+   권한(행정보급관 / 중대장)
+   ---------------------------------------------------------------------------
+   권한이 실제로 갈리는 업무는 **출타 결재 하나뿐**이다.
+   그래서 모든 화면 상단에 드롭다운을 띄우지 않고
+     · 헤더·홈    = 현재 권한을 읽기 전용 배지로만 표시
+     · 출타 화면  = 결재선(신청→검토→승인)과 함께 세그먼트로 전환
+   구조로 정리했다. (사용자 요청 2026-08-25)
+   --------------------------------------------------------------------------- */
 
-  if(currentRole === 'ADMIN') {
-    welcomeText.innerText = '충성! 행정보급관님';
-    welcomeSub.innerText = '용사 출타 검토 및 미니상황판을 관리합니다.';
-  } else if(currentRole === 'COMMANDER') {
-    welcomeText.innerText = '충성! 중대장님';
-    welcomeSub.innerText = '최종 결재 안건 심사 및 상황판을 점검합니다.';
-  }
+const UNIT_NAME = '제31보병사단 제103연대 3대대 9중대';
+
+const ROLE_INFO = {
+  ADMIN:     { name: '행정보급관', person: '상사 김도윤',  unit: UNIT_NAME, pending: 'REVIEW',   label: '내 검토 대기' },
+  COMMANDER: { name: '중대장',     person: '대위 박승현',  unit: UNIT_NAME, pending: 'APPROVAL', label: '내 결재 대기' }
+};
+
+/* 권한 전환 진입점 */
+function setRole(role) {
+  if(!ROLE_INFO[role]) return;
+  currentRole = role;
+  applyRoleUI();
   renderList();
   renderMedicalList();
   renderHomeNotif();
+}
+
+/* 권한에 따른 화면 표시 갱신 */
+function applyRoleUI() {
+  const info = ROLE_INFO[currentRole];
+
+  // 헤더 배지 · 홈 인사말
+  const badge = document.getElementById('roleBadgeText');
+  if(badge) badge.innerText = info.name;
+  const wRole = document.getElementById('welcomeRole');
+  if(wRole) wRole.innerHTML = '<i class="bp-icon bp-icon-shield" aria-hidden="true"></i> ' + escapeHtml(info.name);
+  const wText = document.getElementById('welcomeText');
+  if(wText) wText.innerText = info.person;     // 계급 + 성명
+  const wSub = document.getElementById('welcomeSub');
+  if(wSub) wSub.innerText = info.unit;         // 소속부대 (작은 글씨)
+
+  // 출타 화면 : 결재선 · 세그먼트 · 대기 라벨
+  document.querySelectorAll('.appr-role-btn').forEach(function (b) {
+    const on = b.dataset.role === currentRole;
+    b.classList.toggle('is-on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  const sAdmin = document.getElementById('apprStepAdmin');
+  const sCmd = document.getElementById('apprStepCmd');
+  if(sAdmin) sAdmin.classList.toggle('is-me', currentRole === 'ADMIN');
+  if(sCmd) sCmd.classList.toggle('is-me', currentRole === 'COMMANDER');
+
+  const lab = document.getElementById('statReviewLabel');
+  if(lab) lab.innerText = info.label;
+}
+
+/* 결재선 단계별 대기 건수 */
+function renderApprovalFlow() {
+  const a = document.getElementById('apprCntAdmin');
+  const c = document.getElementById('apprCntCmd');
+  if(a) a.innerText = requests.filter(r => r.status === 'REVIEW').length;
+  if(c) c.innerText = requests.filter(r => r.status === 'APPROVAL').length;
 }
 
 function switchNav(target) {
@@ -105,7 +152,7 @@ function switchNav(target) {
   if(target === 'home') {
     document.getElementById('navHome').classList.add('active');
     document.getElementById('viewHome').classList.add('active');
-    headerTitle.innerHTML = `<i class="bp-icon bp-icon-home" aria-hidden="true"></i> Smart Unit 지휘결재`;
+    headerTitle.innerHTML = `<span class="brand-mark" aria-hidden="true"></span> 스마트부대`;
   } else if(target === 'approval') {
     document.getElementById('navApproval').classList.add('active');
     document.getElementById('viewApproval').classList.add('active');
@@ -764,7 +811,10 @@ function renderList() {
     });
   }
 
-  document.getElementById('statReview').innerText = requests.filter(r => r.status === 'REVIEW').length + '건';
+  // 내 권한이 처리할 단계의 대기 건수 (행보관=검토대기 / 중대장=결재대기)
+  const myPending = ROLE_INFO[currentRole].pending;
+  document.getElementById('statReview').innerText = requests.filter(r => r.status === myPending).length + '건';
+  renderApprovalFlow();
 }
 
 function renderMedicalList() {
@@ -1257,7 +1307,7 @@ function renderRagReportList() {
 
   if(rows.length === 0) {
     listEl.innerHTML = ragHistory.length === 0
-      ? `<div class="empty-msg">아직 분석 결과가 없습니다.<br>홈 화면의 &lsquo;RAG 기반 AI 현장 분석&rsquo;에서 시뮬레이션을 실행하세요.</div>`
+      ? `<div class="empty-msg">아직 분석 결과가 없습니다.<br>위에서 시나리오와 현장 사진을 선택한 뒤 &lsquo;AI 분석 시작&rsquo;을 누르세요.</div>`
       : `<div class="empty-msg">해당 위협수준의 분석 결과가 없습니다.</div>`;
     return;
   }
@@ -1284,6 +1334,12 @@ function openRagHistory(historyId) {
   const item = ragHistory.find(r => r.historyId === historyId);
   if(item) renderRagReport(item);
 }
+
+/* 권한 세그먼트 (출타 결재 화면) */
+document.addEventListener('click', function (e) {
+  const rb = e.target.closest('.appr-role-btn');
+  if(rb) setRole(rb.dataset.role);
+});
 
 /* 오버레이 배경 클릭 / ESC 로 닫기 (진행 중 팝업은 제외) */
 document.addEventListener('click', function (e) {
@@ -1346,6 +1402,8 @@ function isPristine() {
   const scenarioSel = document.getElementById('scenarioSelect');
   if(scenarioSel && scenarioSel.selectedIndex !== 0) return false;
   if(ragAttached) return false;   // 현장 사진을 첨부했으면 변경된 상태다
+  const demo = document.getElementById('demoTools');
+  if(demo && demo.open) return false;   // 시연 도구를 펼쳐 뒀으면 변경된 상태다
 
   // 5) GIS 상황판(시나리오·레이어·확대·선택)도 초기 상태여야 한다
   if(window.GisBoard && !GisBoard.isPristine()) return false;
@@ -1377,8 +1435,6 @@ function resetAppState() {
   dismissPushBanner();
 
   // 4) 입력 폼 원복
-  const roleSel = document.getElementById('roleSelect');
-  if(roleSel) roleSel.value = 'ADMIN';
   const scenarioSel = document.getElementById('scenarioSelect');
   if(scenarioSel) scenarioSel.selectedIndex = 0;
   const rejectInput = document.getElementById('rejectInput');
@@ -1395,6 +1451,9 @@ function resetAppState() {
   renderRagAttachState();
   const progThumb = document.getElementById('ragProgressThumb');
   if(progThumb) { progThumb.hidden = true; progThumb.src = ''; }
+  // 시연 도구 접기
+  const demo = document.getElementById('demoTools');
+  if(demo) demo.open = false;
 
   // 5) 필터 탭 전부 첫 번째(전체)로
   document.querySelectorAll('.filter-tabs').forEach(function (group) {
@@ -1417,7 +1476,7 @@ function resetAppState() {
   if(window.GisBoard) GisBoard.reset();
 
   // 8) 다시 그리기 + 첫 화면으로
-  changeRole();          // renderList / renderMedicalList / renderHomeNotif 포함
+  setRole('ADMIN');      // applyRoleUI / renderList / renderMedicalList / renderHomeNotif 포함
   renderRagReportList();
   switchNav('home');
 }
@@ -1485,7 +1544,7 @@ function startIdleWatch() {
 }
 
 // 초기화 실행
-changeRole();
+setRole('ADMIN');
 renderRagReportList();
 renderRagAttachState();
 startIdleWatch();

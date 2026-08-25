@@ -1,0 +1,29 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(1.5, 0)">
+        <g>
+            <mask id="bullet-mask-left" fill="white">
+                <rect y="4" width="6" height="9" rx="0.5" />
+            </mask>
+            <rect y="4" width="6" height="9" rx="0.5" stroke="#5F6B7C" stroke-width="3.5" stroke-linejoin="round"
+                mask="url(#bullet-mask-left)" />
+        </g>
+        <path d="M1.5 12V14M4.5 12V14" stroke="#5F6B7C" stroke-width="1.75" stroke-linejoin="round" />
+        <rect y="14" width="6" height="1" rx="0.5" fill="#5F6B7C" />
+        <path d="M0.5 3C0.5 1.13333 3 0 3 0C3 0 5.5 1.13333 5.5 3C5.5 3.41656 5.5 4 5.5 4H0.5C0.5 4 0.5 3.41656 0.5 3Z"
+            fill="#5F6B7C" />
+    </g>
+    <g transform="translate(8.5, 4)">
+        <g>
+            <mask id="bullet-mask-right" fill="white">
+                <rect y="3" width="6" height="6" rx="0.5" />
+            </mask>
+            <rect y="3" width="6" height="6" rx="0.5" stroke="#5F6B7C" stroke-width="3.5" stroke-linejoin="round"
+                mask="url(#bullet-mask-right)" />
+        </g>
+        <path d="M1.5 7.99982V9.99982M4.5 7.99982V9.99982" stroke="#5F6B7C" stroke-width="1.75"
+            stroke-linejoin="round" />
+        <rect y="9.99982" width="6" height="1" rx="0.5" fill="#5F6B7C" />
+        <path d="M0.500074 3C0.500074 0 3.00007 0 3.00007 0C3.00007 0 5.50007 0 5.50007 3C5.50007 3.41656 5.50007 4 5.50007 4H0.500074C0.500074 4 0.500074 3.41656 0.500074 3Z"
+            fill="#5F6B7C" />
+    </g>
+</svg>

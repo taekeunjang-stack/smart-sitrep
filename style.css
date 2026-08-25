@@ -30,19 +30,32 @@ body {
   color: var(--app-body);
 }
 
-/* 모바일 프레임 */
+/* 앱 프레임
+   ---------------------------------------------------------------------------
+   flex 컬럼 대신 **grid + 영역 이름**으로 짠다.
+   가로가 넓어지면 마크업을 건드리지 않고 하단바를 좌측 레일로 옮길 수 있다.
+   (오버레이·PUSH 배너는 position:absolute 라 그리드 트랙에 관여하지 않는다) */
 .app-frame {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "header"
+    "content"
+    "nav";
   width: 100%;
   max-width: 43rem;
   height: 100vh;
+  height: 100dvh;
   max-height: 93.2rem;
   overflow: hidden;
   background: var(--app-bg);
   box-shadow: 0 2.5rem 5rem -1.2rem rgba(0, 0, 0, 0.5);
 }
+.app-header  { grid-area: header; }
+.app-content { grid-area: content; min-height: 0; }
+.bottom-nav  { grid-area: nav; }
 
 /* --------------------------------------------------------- PUSH 알림 배너 */
 .push-banner {
@@ -106,23 +119,42 @@ body {
 }
 .header-left h1 .bp-icon { flex: 0 0 auto; color: var(--app-primary); font-size: 2rem; }
 
-.role-select {
+/* 육군 마크
+   ---------------------------------------------------------------------------
+   참고 원본의 「대한민국육군」 로고(smart.biz.code/static/images/login/logo.png)를 쓴다.
+   이 PNG 는 340×50 에 **짙은 남색(rgb 17,32,60) 배경이 깔려 있고**(투명 아님),
+   엠블럼은 x 94~136, 그 오른쪽 x 144~245 는 흰 글자다.
+   → 밝은 헤더에 그대로 두면 남색 띠가 되므로, **엠블럼 구간만 잘라** 남색 칩에 얹는다.
+   (배율 43px → 22px = 0.5116 ⇒ 전체 폭 340×0.5116 = 17.4rem,
+    엠블럼 중심 115px 를 칩 중심 14px 로 보내려면 x 오프셋 -4.48rem)
+   --------------------------------------------------------------------------- */
+.brand-mark {
   flex: 0 0 auto;
-  appearance: none; -webkit-appearance: none;
-  height: 3.2rem;
-  padding: 0 2.6rem 0 1rem;
-  border: 0.1rem solid var(--app-control-border);
-  border-radius: 0.4rem;
-  background-color: var(--app-white);
-  box-shadow: 0 0.1rem 0.2rem var(--app-shadow-btn);
-  color: var(--app-body);
-  font-family: inherit; font-size: 1.2rem; font-weight: 500; line-height: 1.6rem;
-  cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235f6b7c' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  display: inline-block;
+  width: 2.8rem; height: 2.8rem;
+  border-radius: 0.6rem;
+  background-color: #11203c;
+  background-image: url("smart.biz.code/static/images/login/logo.png");
   background-repeat: no-repeat;
-  background-position: right 0.9rem center;
+  background-size: 17.4rem auto;
+  background-position: -4.48rem 0.12rem;
+  vertical-align: middle;
 }
-.role-select:focus-visible { border-color: var(--app-primary); }
+
+/* 현재 권한 배지 (읽기 전용) — 전환은 출타 결재 화면에서 한다 */
+.role-badge {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1rem;
+  border: 0.1rem solid var(--app-primary-soft-30);
+  border-radius: 3rem;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-dark);
+  font-size: 1.2rem; font-weight: 500; line-height: 1.6rem;
+  white-space: nowrap;
+}
+.role-badge .bp-icon { font-size: 1.4rem; }
 
 /* --------------------------------------------------------- 콘텐츠 / 뷰 */
 .app-content {
@@ -157,7 +189,16 @@ body {
   background-size: cover;
   color: var(--app-white);
 }
-.welcome-card .user-info { display: grid; gap: 0.6rem; }
+.welcome-card .user-info { display: grid; gap: 0.6rem; justify-items: start; }
+.welcome-role {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.3rem 1rem;
+  border-radius: 3rem;
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--app-white);
+  font-size: 1.2rem; font-weight: 500; line-height: 1.6rem;
+}
+.welcome-role .bp-icon { font-size: 1.4rem; }
 .welcome-card strong { display: block; font-size: 2.2rem; font-weight: 500; line-height: 2.6rem; }
 .welcome-card p { margin: 0; color: var(--app-muted-dark); font-size: 1.4rem; line-height: 1.8rem; }
 
@@ -210,6 +251,44 @@ body {
 .btn-suspect { background: var(--app-muted); }
 .btn-medical { background: var(--color-complete); }
 .btn-fire    { background: var(--app-alert); }
+
+/* ------------------------------------------- 시연 도구 (홈 하단, 기본 접힘)
+   실제 업무 기능이 아니므로 눈에 덜 띄는 회색 톤으로 두고 접어 놓는다. */
+.demo-tools {
+  margin-top: 1.6rem;
+  border: 0.1rem dashed var(--app-control-border);
+  border-radius: 0.8rem;
+  background: var(--app-detail-bg);
+  overflow: hidden;
+}
+.demo-tools-sum {
+  display: flex; align-items: center; gap: 0.8rem;
+  min-height: 4.2rem;
+  padding: 0 1.4rem;
+  color: var(--app-muted);
+  font-size: 1.3rem; font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+}
+.demo-tools-sum::-webkit-details-marker { display: none; }
+.demo-tools-title { display: inline-flex; align-items: center; gap: 0.6rem; }
+.demo-tools-title .bp-icon { font-size: 1.5rem; }
+.demo-tools-hint {
+  margin-left: auto;
+  padding: 0.2rem 0.7rem;
+  border-radius: 3rem;
+  background: var(--app-detail-label-bg);
+  color: var(--app-muted);
+  font-size: 1.1rem; font-weight: 400; line-height: 1.6rem;
+}
+.demo-tools-caret { color: var(--app-icon); transition: transform 0.2s ease; }
+.demo-tools[open] .demo-tools-caret { transform: rotate(180deg); }
+.demo-tools[open] .demo-tools-sum { border-bottom: 0.1rem solid var(--app-border); }
+
+.demo-tools-body { padding: 1.2rem 1.4rem 1.4rem; }
+.demo-tools-desc { margin: 0 0 1rem; color: var(--app-muted); font-size: 1.15rem; line-height: 1.7rem; }
+.demo-tools .sim-btn { min-height: 5.4rem; font-size: 1.15rem; }
+.demo-tools .sim-btn .bp-icon { font-size: 1.6rem; }
 
 /* ------------------------------------------- 홈 : RAG 시뮬레이션 실행 제어 */
 .rag-simulation-control {
@@ -340,7 +419,7 @@ body {
 }
 .rag-ai-model { margin: 0.8rem 0 0; color: var(--app-muted); font-size: 1.1rem; line-height: 1.6rem; }
 
-/* 실행 / 분석결과 버튼 행 */
+/* 실행 / 분석결과 버튼 행 (사용처가 남아 있을 때 대비) */
 .rag-btn-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, auto); gap: 0.8rem; }
 
 /* 실행 버튼 — 참고 .btn--primary 규격 */
@@ -359,6 +438,7 @@ body {
 #btnStartSimulation:hover:not(:disabled) { background: var(--app-primary-dark); }
 #btnStartSimulation:disabled { opacity: 0.55; cursor: not-allowed; }
 
+#btnStartSimulation { font-size: 1.6rem; }
 #btnRagReports { gap: 0.6rem; white-space: nowrap; }
 .rag-count-badge {
   display: inline-flex; align-items: center; justify-content: center;
@@ -386,6 +466,77 @@ body {
 .notif-item strong { font-size: 1.5rem; font-weight: 500; line-height: 2rem; color: var(--app-text); }
 .notif-item .notif-sub { margin-top: 0.2rem; color: var(--app-muted); font-size: 1.2rem; line-height: 1.6rem; }
 .notif-item .bp-icon { flex: 0 0 auto; color: var(--app-icon); font-size: 1.6rem; }
+
+/* ------------------------------- 출타 결재선 + 권한 전환 (출타 화면 전용) */
+.appr-flow {
+  display: grid; gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.2rem;
+  border: 0.1rem solid var(--app-border);
+  border-radius: 0.8rem;
+  background: var(--app-white);
+}
+
+/* 결재선 : 신청 → 검토 → 승인 */
+.appr-steps {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0; padding: 0; list-style: none;
+}
+.appr-step {
+  position: relative;
+  display: grid; gap: 0.2rem; justify-items: center;
+  padding: 0.6rem 0.3rem;
+  border-radius: 0.6rem;
+  text-align: center;
+}
+/* 단계 사이 연결선 */
+.appr-step + .appr-step::before {
+  content: ""; position: absolute; top: 1.5rem; left: -50%;
+  width: 100%; height: 0.2rem; background: var(--app-border); z-index: 0;
+}
+.appr-step-name {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  color: var(--app-muted); font-size: 1.3rem; font-weight: 500; line-height: 1.8rem;
+}
+.appr-step-who { color: var(--app-muted); font-size: 1.1rem; line-height: 1.5rem; }
+.appr-step-cnt {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.8rem; height: 1.8rem; padding: 0 0.4rem;
+  border-radius: 3rem;
+  background: var(--app-detail-label-bg);
+  color: var(--app-muted);
+  font-size: 1.1rem; font-weight: 500; line-height: 1.4rem;
+}
+/* 신청 단계는 용사가 하는 것이라 항상 회색 */
+.appr-step.is-fixed .appr-step-name { color: var(--app-body); }
+/* 내 권한이 담당하는 단계 */
+.appr-step.is-me { background: var(--app-primary-soft); }
+.appr-step.is-me .appr-step-name { color: var(--app-primary-dark); }
+.appr-step.is-me .appr-step-who { color: var(--app-primary-dark); font-weight: 500; }
+.appr-step.is-me .appr-step-cnt { background: var(--app-primary); color: var(--app-white); }
+
+/* 권한 세그먼트 */
+.appr-role { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.appr-role-label { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--app-muted); font-size: 1.2rem; white-space: nowrap; }
+.appr-role-label .bp-icon { font-size: 1.4rem; }
+.appr-role-seg {
+  display: flex; flex: 0 1 auto; min-width: 0;
+  border: 0.1rem solid var(--app-control-border);
+  border-radius: 0.4rem; overflow: hidden;
+}
+.appr-role-btn {
+  flex: 1 1 auto; min-width: 0;
+  min-height: 3.2rem; padding: 0 1.2rem;
+  border: 0; border-left: 0.1rem solid var(--app-control-border);
+  background: var(--app-white); color: var(--app-body);
+  font-family: inherit; font-size: 1.2rem; font-weight: 500; line-height: 1.6rem;
+  white-space: nowrap; cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.appr-role-btn:first-child { border-left: 0; }
+.appr-role-btn:hover { background: var(--app-primary-soft); color: var(--app-primary-dark); }
+.appr-role-btn.is-on { background: var(--app-primary-dark); color: var(--app-white); }
 
 /* ------------------------------------------------ 목록 화면 : 요약 / 필터 */
 .stat-summary { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; }
@@ -1298,3 +1449,198 @@ body {
 .idle-notice.is-show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .idle-notice .bp-icon { font-size: 1.6rem; }
 .idle-notice strong { color: var(--color-complete); font-weight: 500; }
+
+/* ==========================================================================
+   반응형 — 태블릿(세로/가로) 및 폰 가로 대응
+   --------------------------------------------------------------------------
+   기준
+     · 기본(~599px)          : 폰 세로. 위에서 정의한 그대로.
+     · 600px~               : 태블릿 세로. 프레임을 넓히고 그리드 열을 늘린다.
+     · 900px~ + 가로        : 태블릿 가로. 하단바를 **좌측 레일**로 옮기고
+                              GIS 상황판은 지도+목록 2단으로 편다.
+     · 세로 640px 미만 가로  : 폰 가로. 헤더·네비를 납작하게 줄여 본문을 확보한다.
+   실기기에서는 뷰포트=프레임이라 그대로 꽉 차고,
+   데스크톱에서는 가운데 정렬된 목업 프레임으로 보인다.
+   ========================================================================== */
+
+/* ---------------------------------------------- 태블릿 세로 (600px 이상) */
+@media (min-width: 600px) {
+  body { padding: 0; }
+
+  .app-frame {
+    max-width: 82rem;
+    max-height: none;      /* 패드 세로는 화면 높이를 그대로 쓴다 */
+    border-radius: 0;
+  }
+
+  .app-content { padding: 2rem 2.4rem 3.2rem; }
+
+  /* 홈 : 타일 3열 → 4열, 조금 크게 */
+  .main-menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.2rem; }
+  .menu-tile { min-height: 10rem; gap: 1rem; }
+  .menu-tile span { font-size: 1.4rem; line-height: 1.8rem; }
+  .tile-icon { width: 4.2rem; height: 4.2rem; font-size: 2.2rem; }
+
+  .welcome-card strong { font-size: 2.6rem; line-height: 3rem; }
+  .section-title { font-size: 1.8rem; }
+
+  /* 목록 : 2열 카드 */
+  .card-list { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .notif-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* 미니상황판 */
+  .ov-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .kpi-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .loc-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .chart-container { height: 24rem; }
+  .dash-menu-btn { font-size: 1.4rem; }
+
+  /* 시뮬레이터 · RAG */
+  .sim-btn { min-height: 7rem; font-size: 1.4rem; }
+  .sim-btn .bp-icon { font-size: 2.2rem; }
+
+  /* 팝업을 조금 크게 */
+  .popup { max-width: 52rem; }
+  .modal-small { max-width: 40rem; }
+  .popup-body { font-size: 1.5rem; }
+  .info-table th, .info-table td { font-size: 1.5rem; }
+
+  /* GIS : 지도 여유 확보 */
+  .gisx-list { max-height: 30rem; }
+  .gisx-label { font-size: 1.15rem; }
+}
+
+/* -------------------------------- 태블릿 가로 (900px 이상 + 가로 방향) */
+@media (min-width: 900px) and (orientation: landscape) {
+  .app-frame {
+    max-width: 132rem;
+    /* 하단바 → 좌측 레일 */
+    grid-template-columns: 10rem minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "nav header"
+      "nav content";
+  }
+
+  /* 좌측 네비게이션 레일 */
+  .bottom-nav {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1.2rem 0.6rem;
+    border-right: 0.1rem solid var(--app-border);
+    box-shadow: none;
+  }
+  .nav-item { flex: 0 0 auto; min-height: 6.4rem; font-size: 1.2rem; }
+  .nav-item .bp-icon { width: 4.4rem; height: 3.2rem; border-radius: 1.6rem; font-size: 2.1rem; }
+
+  /* 본문을 넓게 쓰되 지나치게 늘어지지 않도록 */
+  .app-content { padding: 2rem 3.2rem 3.2rem; }
+  .main-menu-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .notif-list, .card-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* 미니상황판 : 2열로 펴되 가로로 꽉 차야 하는 블록은 전체 폭을 쓴다 */
+  .dash-content-area { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .dash-content-area > .ov-tiles,
+  .dash-content-area > .kpi-row,
+  .dash-content-area > .loc-grid,
+  .dash-content-area > .chart-card,
+  .dash-content-area > .section-title,
+  .dash-content-area > .ov-gis-btn,
+  .dash-content-area > .ov-updated { grid-column: 1 / -1; }
+
+  /* PUSH 배너는 레일 폭만큼 밀어준다 */
+  .push-banner { left: 11rem; }
+
+  /* 무입력 안내가 레일에 가리지 않도록 */
+  .idle-notice { bottom: 2rem; left: calc(50% + 5rem); }
+
+  /* ---------------- GIS 상황판 : 지도 + 개체목록 2단 ---------------- */
+  #viewGisBoard.view-page.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 32rem;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "top  top"
+      "stage list";
+    height: calc(100% + 5.2rem);
+    margin: -2rem -3.2rem -3.2rem;
+  }
+  .gisx-topbar { grid-area: top; }
+  .gisx-topbar-row { justify-content: flex-start; gap: 1.6rem; }
+  .gisx-topbar { grid-template-columns: auto minmax(0, 32rem) minmax(0, 1fr); align-items: center; gap: 1.2rem 1.6rem; }
+  .gisx-topbar .gisx-topbar-row { grid-column: 1; }
+  .gisx-topbar .gisx-scenario { grid-column: 2; }
+  .gisx-topbar .gisx-situation { grid-column: 3; }
+
+  .gisx-stage { grid-area: stage; }
+  .gisx-list-panel {
+    grid-area: list;
+    display: flex; flex-direction: column;
+    border-top: 0; border-left: 0.1rem solid var(--app-border);
+    min-height: 0;
+  }
+  /* 가로에서는 목록을 항상 펼쳐 둔다 (접을 이유가 없다) */
+  .gisx-list-panel .gisx-list { display: block; flex: 1 1 auto; max-height: none; min-height: 0; overflow-y: auto; }
+  .gisx-list-toggle { cursor: default; border-bottom: 0.1rem solid var(--app-border); }
+  .gisx-list-caret { display: none; }
+  /* 목록이 옆에 있으므로 지도 하단 칩과 자가데이터박스 위치를 조정 */
+  .gisx-self { bottom: 5.6rem; }
+}
+
+/* -------------------------------------- 폰 가로 (높이가 낮은 가로 화면) */
+@media (orientation: landscape) and (max-height: 640px) {
+  .app-frame { max-height: none; }
+
+  /* 헤더·네비를 납작하게 — 본문 높이를 최대한 확보 */
+  .app-header { height: 4.8rem; }
+  .header-left h1 { font-size: 1.6rem; }
+
+  .bottom-nav { padding: 0.2rem 0.6rem max(0.2rem, env(safe-area-inset-bottom, 0.2rem)); }
+  .nav-item { min-height: 4.4rem; gap: 0.1rem; font-size: 1rem; }
+  .nav-item .bp-icon { width: 4rem; height: 2.4rem; font-size: 1.7rem; }
+
+  .app-content { padding: 1.2rem 1.6rem 1.6rem; }
+  .welcome-card { padding: 1.2rem 1.6rem; }
+  .welcome-card strong { font-size: 1.8rem; line-height: 2.2rem; }
+  .section-title { margin: 1.2rem 0 0.8rem; }
+
+  /* 팝업이 화면 높이를 넘지 않게 */
+  .popup-body { max-height: 42vh; }
+
+  /* GIS : 상황 요약문은 접고 지도를 넓게 */
+  .gisx-topbar { padding: 0.6rem 1.2rem 0.8rem; gap: 0.4rem; }
+  .gisx-situation { display: none; }
+  .gisx-scenario { height: 3.2rem; font-size: 1.3rem; }
+  .gisx-list { max-height: 16rem; }
+
+  /* 초동조치 단계 트래커 여백 축소 */
+  .step-tracker { margin: 1.6rem 0 0.4rem; }
+  .fr-btn-group { margin-top: 1.2rem; }
+}
+
+/* ------------------------- 큰 화면에서 목업 프레임처럼 보이게 (데스크톱) */
+@media (min-width: 1400px) {
+  body { padding: 2.4rem; }
+  .app-frame { border-radius: 1.2rem; max-height: 96rem; }
+}
+
+/* --------------------------------------- 마우스가 없는 기기(터치) 보정 */
+@media (hover: none) {
+  /* 터치에서는 hover 잔상이 남아 어색하다 — 눌림 표현만 남긴다 */
+  .menu-tile:hover, .req-card:hover, .kpi-card:hover, .loc-card:hover,
+  .tank-box:hover, .notif-item:hover, .ov-card:hover, .gisx-item:hover, .gisx-lyr:hover {
+    border-color: var(--app-border);
+    background: var(--app-white);
+    box-shadow: none;
+  }
+  .menu-tile:active, .req-card:active, .kpi-card:active, .loc-card:active,
+  .tank-box:active, .notif-item:active, .ov-card:active, .gisx-item:active, .gisx-lyr:active {
+    background: var(--app-primary-soft);
+    border-color: var(--app-primary);
+  }
+  /* 지도 마커는 터치 목표를 조금 키운다 */
+  .gisx-sym { width: 3.2rem; height: 3.2rem; }
+  .gisx-point--units .gisx-sym { width: 3.8rem; height: 2.8rem; }
+}

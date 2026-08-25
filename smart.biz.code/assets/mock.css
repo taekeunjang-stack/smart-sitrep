@@ -1,0 +1,246 @@
+/* smart.biz 목업 보조 CSS — 퍼블 원문(static\)은 무수정, 확장분만 여기 모은다.
+   [1] 아이콘 확장: 퍼블 subset(_bp-icon.scss) 방식 그대로 icons.json 코드포인트 추가.
+       퍼블 전체본 정합 시 이 파일만 걷어내면 된다. */
+
+/* ── [1] 아이콘 확장 ── */
+.bp-icon-airplane::before{content:"\f10a";}
+.bp-icon-warning-sign::before{content:"\f315";} /* 위험성평가 — dtms 와 동일 */
+.bp-icon-walk::before{content:"\f314";} /* 출타결재 */
+
+/* ── [2] 컴포넌트 확장 (퍼블 네이밍 관례) ── */
+/* 긴급 태그 — 퍼블 tag--primary/success 와 같은 공식(soft 15% 배경 + dark 글자), Blueprint 레드 토큰 */
+.tag--danger{background:var(--app-alert-soft);color:var(--app-danger);}
+/* PUSH 카드 사람 영역 — 발신 좌 / 수신 우, 하단 일시(.list-card-date)와 같은 작은 회색 글자 */
+.list-card-profile--fromto{justify-content:space-between;font-size:1.2rem;line-height:1.4rem;color:var(--app-muted);}
+.list-card-profile--fromto span{color:var(--app-muted);font-weight:400;}
+/* 메세지 보내기·면담입력 시트 — 퍼블 기본 gap 3rem 과다 → 1.2rem (dtms 평가내용등록 폼 실측값: 필드 간 1.2 / 라벨→입력 0.5) */
+#push-compose-sheet .bottom-sheet-body,
+#interview-input-sheet .bottom-sheet-body{gap:1.2rem;}
+/* 버튼 줄 — dtms btnrow 규격 (두 버튼이 행을 반씩 채움) */
+#push-compose-sheet .bottom-sheet-buttons,
+#interview-input-sheet .bottom-sheet-buttons,
+#diag-sheet .bottom-sheet-buttons{padding:1.6rem 0 0;}
+#push-compose-sheet .bottom-sheet-buttons .btn,
+#interview-input-sheet .bottom-sheet-buttons .btn,
+#diag-sheet .bottom-sheet-buttons .btn,
+#vehicle-number-sheet .bottom-sheet-buttons .btn,
+#time-picker-sheet .bottom-sheet-buttons .btn,
+#driver-lookup-sheet .bottom-sheet-buttons .btn{flex:1;padding-inline:0;}
+/* 본문 버튼 줄 풀폭 변형 — 퍼블 content-actions 는 가운데 정렬(min-width 8rem)이라 변형으로 분리 */
+.content-actions--fill .btn{flex:1;padding-inline:0;}
+/* 알림 카드 메시지 내용 행 — .list-card-date 와 같은 구분선 규격, 본문 색 */
+.list-card-link > .list-card-msg{margin-top:0.4rem;padding-top:1.6rem;border-top:0.1rem solid var(--app-border);font-size:1.3rem;line-height:1.8rem;color:var(--app-text);text-align:left;}
+/* 알림 툴바 — 좌: 기간 탭 / 우: 읽지않음 건수 */
+/* min-width:0 필수 — 퍼블 .content 는 grid 라 자식 최소폭이 트랙을 키워 화면이 뷰포트 밖으로 밀린다(dtms 함정 재발) */
+.notice-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-width:0;}
+.notice-toolbar .tabs{flex:1 1 auto;min-width:0;width:auto;}
+.notice-toolbar .tabs-btn{white-space:nowrap;}
+.notice-unread{flex:0 0 auto;font-size:1.3rem;color:var(--app-muted);white-space:nowrap;}
+.notice-unread strong{color:var(--app-alert);font-weight:700;}
+/* PUSH메시지 툴바 가로 넘침 수정 — 퍼블 원문이 360px 에서 425px 로 밀림 (같은 grid 함정).
+   탭 영역이 줄어들 수 있게 min-width:0 체인, 등록 버튼은 원문 고정폭 유지 */
+.push-message-toolbar{min-width:0;}
+.push-message-toolbar .tabs{min-width:0;}
+.push-message-toolbar .tabs-list{min-width:0;}
+.push-message-toolbar .tabs-btn{white-space:nowrap;}
+/* 초동조치 진행 스텝바 — (상황전파)-(출발)-(도착)-(조치), 완료 단계 = primary */
+.stepbar{display:flex;list-style:none;margin:0.4rem 0 0;padding:0;}
+.stepbar-item{flex:1;position:relative;text-align:center;font-size:1.1rem;line-height:1.4rem;color:var(--app-muted);padding-top:1.5rem;}
+.stepbar-item::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:1rem;height:1rem;border-radius:50%;background:var(--app-border);z-index:1;}
+.stepbar-item::after{content:"";position:absolute;top:0.4rem;right:50%;width:100%;height:0.2rem;background:var(--app-border);}
+.stepbar-item:first-child::after{display:none;}
+.stepbar-item.is-done{color:var(--app-primary-dark);}
+.stepbar-time{display:block;margin-top:0.2rem;font-size:1rem;line-height:1.3rem;color:var(--app-muted);}
+.stepbar-item.is-done::before{background:var(--app-primary);}
+.stepbar-item.is-done::after{background:var(--app-primary);}
+/* 면담관리 툴바 — 마스킹해제 좌 / 면담입력 우 */
+.interview-toolbar{justify-content:space-between;}
+/* 하단 일자 라인 — 좌: 종류 배지 / 우: 일자 */
+.list-card-date--withtag{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;}
+/* 헤더 우측 상황전파 일시 */
+.list-card-header .list-card-hdate{font-size:1.2rem;color:var(--app-muted);}
+/* 출타 상세 시트 — 반려/검토완료 풀폭 반분할 · 라벨(th) 가운데 정렬 (dtms 전역 규칙과 동일) */
+#detail-sheet .bottom-sheet-buttons .btn{flex:1;}
+#detail-sheet .bottom-sheet-table th,
+#interview-input-sheet .bottom-sheet-table th{text-align:center;}
+#interview-input-sheet .bottom-sheet-label-col{width:11.6rem;} /* "면담대상자" 5자 줄바꿈 방지 (dtms 라벨 칸 확장값) */
+/* 조치 정보 입력 시트 — 취소/저장 풀폭 반분할 (dtms btnrow 규격) + 본문·버튼 세로 간격 축소 */
+#alert-action-sheet .bottom-sheet-buttons .btn{flex:1;}
+#alert-action-sheet .bottom-sheet-body{gap:1.2rem;padding-bottom:0.4rem;}
+#alert-action-sheet .bottom-sheet-buttons{padding-top:0.8rem;}
+/* 차량운행 트래킹 — 운행시작 후 지도에 차량번호 라벨+차량 마커(원형 핀).
+   종료는 FAB 재클릭 → 시트(번호 수정불가 + [운행종료]) 흐름으로 처리 (별도 버튼 없음) */
+.vehicle-tracking{position:absolute;left:50%;top:38%;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;z-index:5;pointer-events:none;}
+.vehicle-tracking[hidden]{display:none;} /* display:flex 가 hidden 속성을 이기는 것 방지 */
+/* GPS 이동 궤적 — 출발점 S(초록 원) → 현재 차량 위치. 흰 케이싱 위 파란 라인.
+   좌표는 %(viewBox 100×100 + preserveAspectRatio none) — 마커(50%/38%)와 같은 기준이라 끝점이 핀에 붙는다.
+   선 굵기는 vector-effect 로 px 고정(컨테이너 늘어나도 안 굵어짐). 출발점 원은 SVG 로 그리면 찌그러져 HTML 원으로 분리 */
+.vehicle-tracking-path{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;}
+.vehicle-tracking-path[hidden]{display:none;}
+.vehicle-tracking-path-casing{fill:none;stroke:#fff;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;opacity:0.85;vector-effect:non-scaling-stroke;}
+.vehicle-tracking-path-line{fill:none;stroke:var(--app-primary);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;}
+.vehicle-tracking-start{position:absolute;left:41.7%;top:85.6%;transform:translate(-50%,-50%);z-index:4;width:2.6rem;height:2.6rem;border-radius:50%;background:#238551;border:0.2rem solid #fff;color:#fff;font-size:1.3rem;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 0.2rem 0.6rem rgb(17 20 24 / 40%);pointer-events:none;} /* Blueprint success — 퍼블에 --app-success 토큰 없음 */
+.vehicle-tracking-start[hidden]{display:none;}
+/* 작전 화면 아이콘 = 한글 「작」 텍스트 (사용자 확정 — 총·탄약 아이콘 3안 기각) */
+.op-text-icon{color:#fff;font-weight:700;line-height:1;}
+.vehicle-location-fab .op-text-icon{font-size:2rem;}
+.vehicle-tracking-pin .op-text-icon{font-size:2.4rem;}
+.vehicle-tracking-label{background:var(--app-primary);color:#fff;font-size:1.5rem;line-height:1.8rem;font-weight:700;padding:0.5rem 1.2rem;border-radius:0.6rem;white-space:nowrap;box-shadow:0 0.2rem 0.8rem rgb(17 20 24 / 45%);}
+.vehicle-tracking-pin{width:5.6rem;height:5.6rem;border-radius:50%;background:var(--app-primary);display:flex;align-items:center;justify-content:center;box-shadow:0 0.3rem 1rem rgb(17 20 24 / 55%);}
+.vehicle-tracking-pin .bp-icon{font-size:3rem;color:#fff;}
+/* FAB 상태색 — 운행/작전 전: 파란색 / 중: 붉은색. FAB 클릭 → 같은 시트(입력 수정불가 + 종료 버튼) */
+.vehicle-location-fab.is-driving{background:var(--app-alert);}
+/* GIS 화면 — (작)(차) 칩 토글(기본 둘 다 켜짐) 시 지도에 좌표+이름 표시. 작=빨강 / 차=녹색 */
+.gis-markers[hidden]{display:none;}
+.gis-point{position:absolute;transform:translate(-50%,-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:0.3rem;pointer-events:none;}
+.gis-point-label{color:#fff;font-size:1.1rem;font-weight:700;line-height:1.3rem;padding:0.2rem 0.6rem;border-radius:0.4rem;white-space:nowrap;box-shadow:0 0.1rem 0.4rem rgb(17 20 24 / 40%);}
+.gis-marker{width:3.2rem;height:3.2rem;border-radius:50%;color:#fff;font-size:1.4rem;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 0.2rem 0.8rem rgb(17 20 24 / 45%);}
+.gis-point--op .gis-point-label,.gis-point--op .gis-marker{background:var(--app-alert);}
+.gis-point--veh .gis-point-label,.gis-point--veh .gis-marker{background:#238551;} /* Blueprint success */
+.gis-point--bmts .gis-point-label,.gis-point--bmts .gis-marker{background:#634DBF;} /* BMTS — 보라 (Blueprint Indigo) */
+/* 칩 활성색도 마커 색과 일치 */
+.vehicle-location-filter.is-active[data-gis-filter="op"]{background:var(--app-alert);border-color:var(--app-alert);}
+.vehicle-location-filter.is-active[data-gis-filter="veh"]{background:#238551;border-color:#238551;}
+.vehicle-location-filter.is-active[data-gis-filter="bmts"]{background:#634DBF;border-color:#634DBF;}
+/* HAPS(항공 GIS) — 공역 폴리곤 + 헬기 마커 + 수집시간 바 + 주요 현황 카드 (PDR 시안 49p 를 퍼블 스타일로) */
+.haps-zones{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;}
+.haps-zone{fill-opacity:0.22;stroke-width:2;vector-effect:non-scaling-stroke;}
+.haps-zone--blue{fill:#2D72D2;stroke:#2D72D2;}
+.haps-zone--red{fill:#CD4246;stroke:#CD4246;}
+.haps-zone--purple{fill:#634DBF;stroke:#634DBF;}
+.haps-zone--green{fill:#238551;stroke:#238551;}
+.haps-zone--teal{fill:#00A396;stroke:#00A396;}
+.haps-zone--orange{fill:#C87619;stroke:#C87619;}
+.haps-zone-label{position:absolute;transform:translate(-50%,-50%);z-index:4;display:flex;flex-direction:column;align-items:center;gap:0.1rem;font-size:1.1rem;font-weight:700;line-height:1.3rem;text-align:center;pointer-events:none;text-shadow:0 0 0.3rem #fff,0 0 0.5rem #fff;}
+.haps-zone-label small{font-size:0.9rem;font-weight:400;line-height:1.1rem;white-space:nowrap;}
+.haps-zone-label--blue{color:#184A90;}
+.haps-zone-label--red{color:#8E292C;}
+.haps-zone-label--purple{color:#5642A6;}
+.haps-zone-label--green{color:#1C6E42;}
+.haps-zone-label--teal{color:#007067;}
+.haps-zone-label--orange{color:#935610;}
+.haps-flight{position:absolute;transform:translate(-50%,-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:0.3rem;pointer-events:none;}
+.haps-flight-pin{width:3.2rem;height:3.2rem;border-radius:50%;background:var(--app-primary);display:flex;align-items:center;justify-content:center;box-shadow:0 0.2rem 0.8rem rgb(17 20 24 / 45%);}
+.haps-flight-pin .bp-icon{font-size:1.8rem;color:#fff;}
+.haps-flight-label{display:flex;flex-direction:column;align-items:center;background:rgb(17 20 24 / 78%);color:#fff;font-size:1rem;font-weight:700;line-height:1.3rem;padding:0.3rem 0.6rem;border-radius:0.4rem;white-space:nowrap;}
+.haps-flight-label small{font-size:0.9rem;font-weight:400;line-height:1.2rem;}
+.haps-status{position:absolute;left:0.6rem;right:0.6rem;bottom:0.8rem;z-index:6;display:flex;gap:0.4rem;}
+.haps-status-card{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0.2rem;background:var(--app-white);border:0.1rem solid var(--app-border);border-radius:0.6rem;padding:0.6rem 0.2rem;box-shadow:0 0.1rem 0.4rem var(--app-shadow-btn);}
+.haps-status-name{font-size:1rem;line-height:1.3rem;color:var(--app-muted);white-space:nowrap;}
+.haps-status-card strong{font-size:1.8rem;line-height:2rem;font-weight:700;}
+.haps-status-card strong small{font-size:1rem;font-weight:400;margin-left:0.1rem;}
+.haps-status-card--total strong{color:var(--app-primary);}
+.haps-status-card--fly strong{color:#238551;}
+.haps-status-card--duty strong{color:#C87619;}
+.haps-status-card--wait strong{color:#00A396;}
+.haps-status-card--abn strong{color:var(--app-danger);}
+/* 미니상황판 — 미니상황판(현황 4) + 간편등록 두 섹션 결합 (9사단 실기기 구조) */
+.menu-hub-subheading{margin-top:2.8rem;}
+/* 현황 화면 (병력현황 등) — 요약 카드 + ECharts 패널 + 종합현황 표 */
+/* 현황 화면의 .content 는 퍼블 grid gap(과다)이 그대로 세로 간격이 된다 → 1.2rem 으로 축소, 개별 margin 제거 */
+.content:has(.mstat-meta){gap:1.2rem;}
+.mstat-meta{font-size:1.2rem;line-height:1.6rem;color:var(--app-muted);margin-bottom:0;}
+.mstat-cards{display:flex;gap:0.8rem;margin-bottom:0;}
+.mstat-card{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0.4rem;background:var(--app-white);border:0.1rem solid var(--app-border);border-radius:0.8rem;padding:1.2rem 0.4rem;}
+.mstat-card-name{font-size:1.2rem;line-height:1.5rem;color:var(--app-muted);}
+.mstat-card-num{font-size:2.2rem;line-height:2.4rem;font-weight:700;}
+.mstat-card-num small{font-size:1.1rem;font-weight:400;margin-left:0.1rem;}
+.mstat-card-num--total{color:var(--app-primary);}
+.mstat-card-num--out{color:var(--app-danger);}
+.mstat-card-num--now{color:#1C6E42;}
+.mstat-card-num--teal{color:#007067;}
+.mstat-card-num--orange{color:#935610;}
+.mstat-card-num--purple{color:#5642A6;}
+.mstat-cards--mini{margin-bottom:0;gap:0.5rem;}
+.mstat-card-num--text{font-size:1.4rem;line-height:2rem;}
+.mstat-chart--gauge{height:17rem;}
+/* 유동병력 위치 그리드 */
+.mloc-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
+.mloc-item{display:flex;align-items:center;justify-content:space-between;gap:0.4rem;background:var(--app-bg,#F6F7F9);border:0.1rem solid var(--app-border);border-radius:0.6rem;padding:0.8rem 1rem;font-size:1.2rem;line-height:1.5rem;color:var(--app-text);}
+.mloc-item strong{font-size:1.4rem;font-weight:700;color:var(--app-primary);}
+.mstat-down{color:var(--app-danger);}
+.mstat-up{color:#1C6E42;}
+/* 현황 탭 패널 — 퍼블 display 가 hidden 속성을 이기는 것 방지 */
+[data-mtab-panel][hidden]{display:none !important;}
+/* 일일결산 — 탭 선택된 구분 카드만 표시 */
+[data-settlement-accordion-item][hidden]{display:none !important;}
+/* 일일결산 탭 — 3개 탭 높이 통일(활성 탭만 길어져 옆 탭 밑으로 회색이 비치던 문제).
+   ⚠️ nowrap 금지 — min-content 가 커져 화면이 뷰포트 밖으로 밀린다(grid 함정) */
+[data-settlement-tabs] .tabs-list{align-items:stretch;}
+[data-settlement-tabs] .tabs-item{display:flex;min-width:0;}
+[data-settlement-tabs] .tabs-btn{height:100%;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.tab-line2{white-space:nowrap;} /* 탭 라벨 괄호 재줄바꿈 방지 — 부분 nowrap 이라 min-content 팽창 최소 (일일결산·유류결산 공용) */
+/* 결산일 캘린더 아이콘 — 우측 배치 (검색기간·주유시간 등 다른 화면 표준과 통일) */
+.settlement-form-date-control .settlement-form-date-icon{order:2;margin-left:auto;}
+.settlement-form-date-control .settlement-form-date-value{order:1;}
+.mstat-cards--mini .mstat-card{padding:0.8rem 0.2rem;}
+.mstat-cards--mini .mstat-card-name{font-size:1.1rem;white-space:nowrap;}
+.mstat-cards--mini .mstat-card-num{font-size:1.7rem;line-height:2rem;}
+.mstat-panel{background:var(--app-white);border:0.1rem solid var(--app-border);border-radius:0.8rem;padding:1.4rem 1.2rem;margin-bottom:0;}
+.mstat-panel-title{font-size:1.4rem;line-height:1.8rem;font-weight:700;color:var(--app-text);margin-bottom:1rem;}
+.mstat-chart{width:100%;height:24rem;}
+.mstat-chart--bar{height:22rem;}
+.mstat-table{width:100%;border-collapse:collapse;}
+.mstat-table th,.mstat-table td{border:0.1rem solid var(--app-border);padding:0.7rem 0.4rem;font-size:1.2rem;line-height:1.5rem;text-align:center;}
+.mstat-table thead th{background:var(--app-primary-soft-15,rgba(45,114,210,0.12));color:var(--app-primary-dark,#184A90);font-weight:700;}
+.mstat-table tbody th{background:var(--app-bg,#F6F7F9);font-weight:500;}
+.mstat-table-total th,.mstat-table-total td{font-weight:700;background:var(--app-bg,#F6F7F9);}
+/* 챗봇 — 빈 화면 + AI 호출 자리 표시. ai.svg 는 흰색 그림이라 파란 원 배경 위에 얹는다 */
+.chatbot-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;min-height:50vh;color:var(--app-muted);}
+.chatbot-placeholder .bp-icon{width:6.4rem;height:6.4rem;border-radius:50%;background:var(--app-primary);display:flex;align-items:center;justify-content:center;box-shadow:0 0.2rem 0.8rem rgb(17 20 24 / 25%);}
+.chatbot-placeholder .bp-icon::before{width:3.2rem;height:3.2rem;}
+.chatbot-placeholder p{font-size:1.5rem;line-height:2rem;}
+/* 포커스 링 — 퍼블 layout.css 의 전역 `*:focus` 가 :focus-visible 이 아니라 :focus 라서
+   마우스로 누른 뒤에도 파란 아웃라인이 남는다(카드 제목 버튼·토글에서 특히 눈에 띔).
+   키보드 이동(:focus-visible)에는 그대로 남기고 마우스 클릭에만 지운다. box-shadow 는
+   전역 규칙이 넣는 inset 흰 링만 걷어내면 되므로 자기 그림자를 가진 컴포넌트는 제외 */
+*:focus:not(:focus-visible){outline:none;}
+*:focus:not(:focus-visible):not(.vehicle-location-fab):not(.bottom-nav-chatbot):not(.list-card-bulk-btn){box-shadow:none;}
+/* 카드 테두리 강조도 클릭 잔상으로 남는다 (.list-card:focus-within).
+   마우스에서 벗어나면 원래대로 — hover 중에는 강조를 유지해야 하므로 :not(:hover) 필수 */
+.list-card:focus-within:not(:hover):not(:has(:focus-visible)){border-color:var(--app-border);box-shadow:none;}
+/* 폼 안내문 — 퍼블 entry-access-detail-notice(시트용, 좌우 2.4rem 패딩)와 같은 색·크기, 폼 필드 아래용 */
+.fuel-form-notice{margin:0.4rem 0 0;color:var(--app-alert);font-size:1.2rem;line-height:1.6rem;}
+/* 출입결재 상세 시트 — 신청 상태일 때만 반려/승인 노출 (퍼블 display 가 hidden 을 이기는 것 방지) */
+[data-detail-actions][hidden]{display:none !important;}
+#detail-sheet .bottom-sheet-buttons .btn{flex:1;padding-inline:0;}
+/* 더보기 (인피니티 스크롤 대체) — 목록 아래 풀폭 버튼 */
+.list-more-btn{display:flex;align-items:center;justify-content:center;gap:0.4rem;width:100%;margin-top:0.4rem;color:var(--app-muted);}
+/* 주간점검 체크리스트 — 웹 「결산 > 주간점검」 4열 표(구분·점검요소·점검결과·비고)를 모바일 카드로 번안.
+   웹은 점검결과가 콤보(값 O 확인)지만 항목마다 콤보를 여는 건 번거로워 O/X 세그먼트로 바꿨다 */
+.wchk{display:grid;gap:1rem;min-width:0;}
+.wchk-head{display:grid;gap:0.2rem;}
+.wchk-period{margin:0;color:var(--app-muted);font-size:1.2rem;line-height:1.6rem;}
+.wchk-title{margin:0;color:var(--app-text);font-size:1.6rem;font-weight:700;line-height:2.2rem;}
+.wchk-list{display:grid;gap:0.8rem;margin:0;padding:0;list-style:none;min-width:0;}
+.wchk-list[hidden]{display:none !important;} /* display:grid 가 hidden 속성을 이겨 점검표가 겹쳐 나오던 버그 */
+.wchk-item{display:grid;gap:0.4rem;min-width:0;padding:1.2rem;border:0.1rem solid var(--app-border);border-radius:0.8rem;background:var(--app-white);}
+.wchk-item-cat{color:var(--app-primary);font-size:1.2rem;font-weight:700;line-height:1.6rem;}
+/* 판단 순서 = 구분 → 점검요소 → 부연설명 → [O][X] + 비고 한 줄 (사용자 지시) */
+.wchk-item-result{display:flex;align-items:center;gap:0.6rem;min-width:0;margin-top:0.4rem;}
+.wchk-choice{flex:0 0 auto;display:flex;border:0.1rem solid var(--app-control-border);border-radius:0.4rem;overflow:hidden;}
+.wchk-choice-btn{width:4rem;height:3rem;background:var(--app-white);color:var(--app-muted);font-size:1.4rem;font-weight:700;line-height:1.6rem;}
+.wchk-choice-btn+.wchk-choice-btn{border-left:0.1rem solid var(--app-control-border);}
+.wchk-choice-btn[aria-pressed="true"]{background:var(--app-primary);color:var(--app-white);}
+.wchk-choice-btn[data-check-choice="X"][aria-pressed="true"]{background:var(--app-alert);}
+.wchk-item-name{margin:0;color:var(--app-text);font-size:1.4rem;font-weight:500;line-height:1.9rem;}
+.wchk-item-desc{margin:0;color:var(--app-muted);font-size:1.2rem;line-height:1.7rem;}
+.wchk-item-remarks{flex:1 1 auto;width:100%;min-width:0;height:3.6rem;padding:0 1rem;border:0.1rem solid var(--app-control-border);border-radius:0.4rem;background:var(--app-white);box-shadow:inset 0 0.1rem 0.2rem var(--app-shadow-inset-strong);color:var(--app-body);font-size:1.3rem;line-height:1.6rem;}
+/* 부대운영진단 — 시트 본문이 form 하나만 감싸서 퍼블 bottom-sheet-body 의 gap 이 필드에 안 먹는다 */
+#diag-sheet [data-diag-form]{display:grid;gap:1.2rem;min-width:0;}
+/* 부대운영진단 — 목록 툴바(조회결과 좌 / 체크리스트 등록 우) + 카드 O·X 요약 */
+.diag-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-width:0;}
+.diag-toolbar .result-summary-title{margin:0;}
+.diag-toolbar .btn{flex:0 0 auto;}
+.diag-result{display:flex;gap:0.4rem;margin:0.6rem 0 0;}
+/* 퍼블은 .list-card-toggle 안의 날짜 줄에만 flex+gap 을 주므로, .list-card-link 구조인 이 카드는
+   「진단일」과 값이 붙어 나온다. 다른 목록(출타·진료·출입결재)과 같은 0.8rem 으로 맞춘다 */
+.list-card-link > p.list-card-date{display:flex;gap:0.8rem;}
+/* 항목 추가 — 체크리스트에 없는 항목을 현장에서 직접 넣는 행 */
+.wchk-add{width:100%;gap:0.4rem;}
+.wchk-item--new{border-style:dashed;}
+.wchk-item-newhead{display:flex;align-items:center;gap:0.6rem;min-width:0;}
+.wchk-item-input{width:100%;min-width:0;height:3.4rem;padding:0 1rem;border:0.1rem solid var(--app-control-border);border-radius:0.4rem;background:var(--app-white);color:var(--app-text);font-size:1.3rem;line-height:1.6rem;}
+.wchk-item-input--cat{flex:1 1 auto;}
+.wchk-item-del{flex:0 0 auto;width:3rem;height:3rem;color:var(--app-muted);}
+.wchk-empty{margin:0;padding:2.4rem 1.2rem;border:0.1rem solid var(--app-border);border-radius:0.8rem;background:var(--app-white);color:var(--app-muted);font-size:1.3rem;line-height:1.8rem;text-align:center;}
