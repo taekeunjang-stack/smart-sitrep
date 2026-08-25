@@ -2,675 +2,612 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Unit 간부용 결재 및 진료 확인 시스템</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --primary: #1b4998;
-      --primary-light: #eff6ff;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --border: #e2e8f0;
-      --text: #0f172a;
-      --sub-text: #64748b;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Smart Unit 지휘결재 및 상황 관리 System</title>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
-    body { background-color: #020617; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+  <!-- ===================================================================
+       디자인 기준 : smart.biz.code (육군지능형스마트부대 모바일 퍼블)
+       · layout.css   → html{font-size:10px} · Roboto @font-face · --app-* 토큰 · .sr-only
+       · contents.css → 컴포넌트 원본
+       · mock.css     → 포커스 잔상 보정 · tag--danger
+       · blueprint    → 아이콘 폰트 (Font Awesome CDN 대체)
+       style.css 는 이 위에 얹는 이 앱 전용 레이어이므로 반드시 마지막에 링크한다.
+       =================================================================== -->
+  <link rel="preload" href="smart.biz.code/static/fonts/roboto/roboto-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="smart.biz.code/static/fonts/roboto/roboto-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="smart.biz.code/static/vendor/icons/blueprint/lib/css/blueprint-icons.css">
+  <link rel="stylesheet" href="smart.biz.code/static/css/layout.css">
+  <link rel="stylesheet" href="smart.biz.code/static/css/contents.css">
+  <link rel="stylesheet" href="smart.biz.code/assets/mock.css">
+  <link rel="stylesheet" href="style.css">
 
-    .galaxy-device {
-      width: 100%;
-      max-width: 412px;
-      height: 880px;
-      max-height: 96vh;
-      background-color: var(--bg);
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      border: 4px solid #1e293b;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .galaxy-punchhole {
-      width: 12px; height: 12px; background-color: #000; border-radius: 50%;
-      position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 100;
-    }
-    .status-bar { height: 28px; background: white; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; font-size: 11px; font-weight: 600; color: #334155; }
-
-    .role-switcher { background: #0f172a; color: white; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-    .role-switcher select { background: #1e293b; color: white; border: 1px solid #334155; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-
-    .app-header { background: white; padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .app-header h2 { font-size: 15px; color: var(--text); }
-
-    .content-area { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 70px; }
-    
-    .view-page { display: none; }
-    .view-page.active { display: block; }
-
-    .welcome-card { background: linear-gradient(135deg, #1b4998, #2563eb); color: white; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-    .welcome-card h3 { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
-    .welcome-card p { font-size: 11px; opacity: 0.9; }
-
-    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
-    .stat-card { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px; text-align: center; }
-    .stat-card .num { font-size: 16px; font-weight: bold; color: var(--primary); margin-top: 4px; }
-    .stat-card .label { font-size: 10px; color: var(--sub-text); }
-
-    .section-title { font-size: 13px; font-weight: bold; color: var(--text); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-    
-    .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
-    .menu-item { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 12px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
-    .menu-item:active { background: var(--primary-light); }
-    .menu-item i { font-size: 18px; color: var(--primary); margin-bottom: 6px; }
-    .menu-item span { font-size: 10px; font-weight: 600; color: var(--text); text-align: center; word-break: keep-all; }
-    .menu-item.disabled { opacity: 0.45; cursor: not-allowed; background: #f8fafc; }
-
-    .notif-item { background: white; border-radius: 6px; border: 1px solid var(--border); padding: 10px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; cursor: pointer; }
-
-    .filter-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
-    .tab-btn { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; white-space: nowrap; }
-    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
-
-    .req-card { background: white; border-radius: 6px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
-    .req-card:active { background-color: #f1f5f9; }
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-    .badge-review { background: #fef3c7; color: #92400e; }
-    .badge-approval { background: #dbeafe; color: #1e40af; }
-    .badge-success { background: #d1fae5; color: #065f46; }
-    .badge-reject { background: #fee2e2; color: #991b1b; }
-
-    .layer-overlay {
-      position: absolute; inset: 0; background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 200; padding: 16px;
-    }
-    .layer-overlay.active { display: flex; }
-    .layer-popup {
-      background: white; width: 100%; max-width: 360px; border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3); overflow: hidden; animation: popIn 0.2s ease-out;
-    }
-    @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    .popup-header { background: #f8fafc; padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .popup-body { padding: 16px; max-height: 480px; overflow-y: auto; }
-    
-    .info-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
-    .info-table th, .info-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
-    .info-table th { background: #f1f5f9; color: #475569; width: 34%; }
-
-    .popup-footer { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-    .btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
-    .btn-cancel { background: #f1f5f9; color: #475569; border: 1px solid var(--border); }
-    .btn-reject { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
-    .btn-approve { background: var(--primary); color: white; }
-
-    .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 56px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--sub-text); cursor: pointer; width: 25%; }
-    .nav-item.active { color: var(--primary); font-weight: bold; }
-    .nav-item i { font-size: 15px; margin-bottom: 2px; }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<div class="galaxy-device">
-  <div class="galaxy-punchhole"></div>
-  <div class="status-bar">
-    <span>10:24</span>
-    <div><i class="fa-solid fa-wifi"></i> <i class="fa-solid fa-signal"></i> <i class="fa-solid fa-battery-three-quarters"></i></div>
+  <!-- 모바일 프레임 Wrapper -->
+  <div class="app-frame">
+
+    <!-- 상단 PUSH 알림 배너 (상황 발생 시 노출) -->
+    <div id="pushBanner" class="push-banner">
+      <div class="push-content" onclick="openFirstResponseFromPush()">
+        <i class="push-icon bp-icon bp-icon-warning-sign" aria-hidden="true"></i>
+        <div class="push-text">
+          <strong id="pushTitle">[비상] 상황 발생</strong>
+          <span id="pushBody">위치 확인 및 조치 필요</span>
+        </div>
+      </div>
+      <button class="push-close-btn" type="button" onclick="dismissPushBanner()" aria-label="알림 닫기">&times;</button>
+    </div>
+
+    <!-- 헤더 영역 -->
+    <header class="app-header">
+      <div class="header-left">
+        <h1 id="headerTitle"><i class="bp-icon bp-icon-home" aria-hidden="true"></i> Smart Unit 지휘결재</h1>
+      </div>
+      <div class="header-right">
+        <label class="sr-only" for="roleSelect">시연 권한 선택</label>
+        <select id="roleSelect" onchange="changeRole()" class="role-select">
+          <option value="ADMIN">행정보급관 (검토)</option>
+          <option value="COMMANDER">중대장 (결재)</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- 메인 스크롤 콘텐츠 영역 -->
+    <main class="app-content">
+
+      <!-- PAGE 1: 메인 홈 -->
+      <section id="viewHome" class="view-page active">
+        <div class="welcome-card">
+          <div class="user-info">
+            <strong id="welcomeText">충성! 행정보급관님</strong>
+            <p id="welcomeSub">용사 출타 검토 및 미니상황판을 관리합니다.</p>
+          </div>
+        </div>
+
+        <!-- 메인 홈 중간 주요 기능 버튼 메뉴 레이아웃 -->
+        <div class="section-title">
+          <span><i class="bp-icon bp-icon-applications" style="color:var(--app-primary)" aria-hidden="true"></i> 주요 기능 바로가기</span>
+        </div>
+        <div class="main-menu-grid">
+          <button class="menu-tile" type="button" onclick="switchNav('approval')">
+            <div class="tile-icon" style="background:var(--app-primary-soft); color:var(--app-primary-dark);">
+              <i class="bp-icon bp-icon-walk" aria-hidden="true"></i>
+            </div>
+            <span>출타 결재/검토</span>
+          </button>
+          <button class="menu-tile" type="button" onclick="switchNav('hospital')">
+            <div class="tile-icon" style="background:var(--color-complete-bg); color:var(--color-complete);">
+              <i class="bp-icon bp-icon-diagnosis" aria-hidden="true"></i>
+            </div>
+            <span>진료 신청 확인</span>
+          </button>
+          <button class="menu-tile" type="button" onclick="switchNav('dashboard')">
+            <div class="tile-icon" style="background:var(--color-approval-bg); color:var(--color-approval);">
+              <i class="bp-icon bp-icon-dashboard" aria-hidden="true"></i>
+            </div>
+            <span>미니 상황판</span>
+          </button>
+          <button class="menu-tile" type="button" onclick="switchNav('firstResponse')">
+            <div class="tile-icon" style="background:var(--app-alert-soft); color:var(--app-alert);">
+              <i class="bp-icon bp-icon-feed" aria-hidden="true"></i>
+            </div>
+            <span>초동조치 관리</span>
+          </button>
+          <button class="menu-tile" type="button" onclick="switchNav('ragReport')">
+            <div class="tile-icon" style="background:var(--app-primary-soft-15); color:var(--app-primary-dark);">
+              <i class="bp-icon bp-icon-clipboard" aria-hidden="true"></i>
+            </div>
+            <span>AI 분석 결과</span>
+          </button>
+          <button class="menu-tile" type="button" onclick="switchNav('gisBoard')">
+            <div class="tile-icon" style="background:#e8e5f7; color:#634DBF;">
+              <i class="bp-icon bp-icon-area-of-interest" aria-hidden="true"></i>
+            </div>
+            <span>GIS 상황판</span>
+          </button>
+        </div>
+
+        <!-- 비상 상황 시뮬레이터 -->
+        <div class="section-title">
+          <span><i class="bp-icon bp-icon-warning-sign" style="color:var(--app-alert)" aria-hidden="true"></i> 비상 상황 테스트 시뮬레이터</span>
+        </div>
+        <div class="sim-btn-grid">
+          <button class="sim-btn btn-suspect" type="button" onclick="triggerEvent('SUSPECT')"><i class="bp-icon bp-icon-person" aria-hidden="true"></i> 거수자 식별</button>
+          <button class="sim-btn btn-medical" type="button" onclick="triggerEvent('MEDICAL')"><i class="bp-icon bp-icon-diagnosis" aria-hidden="true"></i> 응급환자 발생</button>
+          <button class="sim-btn btn-fire" type="button" onclick="triggerEvent('FIRE')"><i class="bp-icon bp-icon-fuel" aria-hidden="true"></i> 유류고 화재</button>
+        </div>
+
+        <!-- RAG 기반 AI 현장 분석 시뮬레이션 실행 제어부 -->
+        <div class="section-title">
+          <span><i class="bp-icon bp-icon-ai" style="color:var(--app-primary)" aria-hidden="true"></i> RAG 기반 AI 현장 분석</span>
+        </div>
+        <div class="rag-simulation-control">
+          <label class="sr-only" for="scenarioSelect">분석 시나리오 선택</label>
+          <select id="scenarioSelect" onchange="onScenarioChange()">
+            <option value="SCN-001">시나리오 1: 대공혐의점 유실물 분석</option>
+            <option value="SCN-002">시나리오 2: 국가중요시설 드론 침입 분석</option>
+            <option value="SCN-003">시나리오 3: 다중이용시설 의심 방치물 분석</option>
+            <option value="SCN-004">시나리오 4: 서해안 부유물 표류 분석</option>
+            <option value="SCN-005">시나리오 5: 군사보호구역 불법 통신장비 분석</option>
+          </select>
+          <!-- 현장 사진 첨부 (분석 전 단계) -->
+          <div class="rag-attach" id="ragAttach">
+            <div class="rag-attach-thumb" id="ragAttachThumb">
+              <i class="bp-icon bp-icon-presentation" aria-hidden="true"></i>
+            </div>
+            <div class="rag-attach-info">
+              <p class="rag-attach-title" id="ragAttachTitle">현장 사진 미첨부</p>
+              <p class="rag-attach-desc" id="ragAttachDesc">촬영된 현장 사진을 확인하고 첨부하세요.</p>
+            </div>
+            <button class="btn rag-attach-btn" type="button" onclick="openRagAttach()">
+              <i class="bp-icon bp-icon-clip" aria-hidden="true"></i> 첨부
+            </button>
+          </div>
+
+          <div class="rag-btn-row">
+            <button id="btnStartSimulation" type="button" onclick="runSimulation()">
+              <i class="bp-icon bp-icon-predictive-analysis" aria-hidden="true"></i> 시뮬레이션 시작
+            </button>
+            <button id="btnRagReports" class="btn" type="button" onclick="switchNav('ragReport')">
+              <i class="bp-icon bp-icon-clipboard" aria-hidden="true"></i> 분석 결과
+              <span id="ragCountBadge" class="rag-count-badge">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 최근 결재 안건 -->
+        <div class="section-title">
+          <span><i class="bp-icon bp-icon-notifications" style="color:var(--app-primary)" aria-hidden="true"></i> 최근 결재 및 신청 안건</span>
+        </div>
+        <div id="recentNotifList" class="notif-list"></div>
+      </section>
+
+      <!-- PAGE 2: 용사 출타 검토 및 결재 -->
+      <section id="viewApproval" class="view-page">
+        <div class="stat-summary">
+          <div class="stat-box">
+            <span>검토 대기</span>
+            <strong id="statReview">0건</strong>
+          </div>
+        </div>
+        <div class="filter-tabs">
+          <button class="tab-btn active" type="button" onclick="filterList('ALL', this)">전체</button>
+          <button class="tab-btn" type="button" onclick="filterList('REVIEW', this)">검토대기</button>
+          <button class="tab-btn" type="button" onclick="filterList('APPROVAL', this)">결재대기</button>
+          <button class="tab-btn" type="button" onclick="filterList('SUCCESS', this)">승인</button>
+          <button class="tab-btn" type="button" onclick="filterList('REJECT', this)">반려</button>
+        </div>
+        <div id="requestList" class="card-list"></div>
+      </section>
+
+      <!-- PAGE 3: 용사 진료 신청 확인 -->
+      <section id="viewHospital" class="view-page">
+        <div class="stat-summary">
+          <div class="stat-box">
+            <span>확인 대기 진료</span>
+            <strong id="statMedicalPending" style="color:var(--color-complete);">0건</strong>
+          </div>
+        </div>
+        <div class="filter-tabs">
+          <button class="tab-btn active" type="button" onclick="filterMedical('ALL', this)">전체</button>
+          <button class="tab-btn" type="button" onclick="filterMedical('SUBMITTED', this)">확인대기</button>
+          <button class="tab-btn" type="button" onclick="filterMedical('CONFIRMED', this)">확인완료</button>
+        </div>
+        <div id="medicalList" class="card-list"></div>
+      </section>
+
+      <!-- PAGE 4: 미니상황판 현황 -->
+      <section id="viewDashboard" class="view-page">
+        <div class="dash-category-menu">
+          <button id="btnDashOverview" class="dash-menu-btn active" type="button" onclick="switchDashCategory('overview')">전체현황</button>
+          <button id="btnDashForces" class="dash-menu-btn" type="button" onclick="switchDashCategory('forces')">병력</button>
+          <button id="btnDashMovement" class="dash-menu-btn" type="button" onclick="switchDashCategory('movement')">유동병력</button>
+          <button id="btnDashArmory" class="dash-menu-btn" type="button" onclick="switchDashCategory('armory')">무기·탄약</button>
+          <button id="btnDashFuel" class="dash-menu-btn" type="button" onclick="switchDashCategory('fuel')">유류</button>
+        </div>
+        <div id="dashContentArea" class="dash-content-area"></div>
+      </section>
+
+      <!-- PAGE 5: 초동조치 수신 및 이력 -->
+      <section id="viewFirstResponse" class="view-page">
+        <div class="fr-tab-group">
+          <button id="frTabActive" class="fr-tab active" type="button" onclick="switchFrTab('ACTIVE')">진행 중 상황</button>
+          <button id="frTabHistory" class="fr-tab" type="button" onclick="switchFrTab('HISTORY')">조치 이력</button>
+        </div>
+
+        <div id="frActiveSection">
+          <div id="frNoActiveMsg" class="no-data-card" style="display:none;">현재 진행 중인 초동조치 상황이 없습니다.</div>
+
+          <div id="frActiveContent" class="fr-card">
+            <div class="fr-header">
+              <strong id="frTitle" class="fr-title">[비상] 상황명</strong>
+              <div id="frTime" class="fr-time">발생 시각: -</div>
+              <div id="frLocation" class="fr-location">위치: -</div>
+            </div>
+
+            <div class="step-tracker">
+              <div id="step1" class="step-item active">
+                <div class="step-circle">1</div>
+                <div class="step-label">현장출발</div>
+                <div id="step1Status" class="step-status">대기중</div>
+                <div id="step1Time" class="step-time">시각: 미진행</div>
+              </div>
+              <div id="step2" class="step-item">
+                <div class="step-circle">2</div>
+                <div class="step-label">현장도착</div>
+                <div id="step2Status" class="step-status">대기</div>
+                <div id="step2Time" class="step-time">시각: 미진행</div>
+              </div>
+              <div id="step3" class="step-item">
+                <div class="step-circle">3</div>
+                <div class="step-label">조치완료</div>
+                <div id="step3Status" class="step-status">대기</div>
+                <div id="step3Time" class="step-time">시각: 미진행</div>
+              </div>
+            </div>
+
+            <div class="fr-btn-group">
+              <button id="btnDepart" class="btn btn-primary" type="button" onclick="handleFirstResponseStep('DEPART')">1. 현장 출발</button>
+              <button id="btnArrive" class="btn btn-warning" type="button" onclick="handleFirstResponseStep('ARRIVE')" disabled>2. 현장 도착</button>
+              <button id="btnComplete" class="btn btn-success" type="button" onclick="handleFirstResponseStep('COMPLETE')" disabled>3. 조치 완료</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="frHistorySection" style="display:none;">
+          <div id="frHistoryList" class="card-list"></div>
+        </div>
+      </section>
+
+      <!-- PAGE 7: GIS 디지털 상황판 (ATAK 유사) -->
+      <section id="viewGisBoard" class="view-page">
+        <!-- 상단 상황 바 -->
+        <div class="gisx-topbar">
+          <div class="gisx-topbar-row">
+            <span class="gisx-readiness gisx-readiness--normal" id="gisReadiness">진돗개 셋</span>
+            <span class="gisx-dtg" id="gisDtg">—</span>
+          </div>
+          <label class="sr-only" for="gisScenarioSelect">상황 시나리오 선택</label>
+          <select class="gisx-scenario" id="gisScenarioSelect"></select>
+          <p class="gisx-situation" id="gisSituation"></p>
+        </div>
+
+        <!-- 지도 -->
+        <div class="gisx-stage" id="gisStage">
+          <div class="gisx-canvas" id="gisCanvas">
+            <img class="gisx-map" id="gisMapImg" src="" alt="작전지역 지형도" draggable="false">
+            <div class="gisx-markers" id="gisMarkers"></div>
+          </div>
+
+          <!-- 좌상단 : 지도 컨트롤 -->
+          <div class="gisx-controls gisx-overlay-ui">
+            <div class="gisx-ctrl-group">
+              <button class="gisx-ctrl" type="button" data-gis-zoom="in" aria-label="확대"><i class="bp-icon bp-icon-zoom-in" aria-hidden="true"></i></button>
+              <button class="gisx-ctrl" type="button" data-gis-zoom="out" aria-label="축소"><i class="bp-icon bp-icon-zoom-out" aria-hidden="true"></i></button>
+            </div>
+            <button class="gisx-ctrl gisx-ctrl--solo" type="button" data-gis-zoom="reset" aria-label="전체 보기"><i class="bp-icon bp-icon-locate" aria-hidden="true"></i></button>
+            <span class="gisx-zoom-label" id="gisZoomLabel">×1.0</span>
+          </div>
+
+          <!-- 우상단 : 레이어 관리 -->
+          <div class="gisx-toolbar gisx-overlay-ui">
+            <button class="gisx-tool" type="button" data-gis-layer-open aria-haspopup="dialog">
+              <i class="bp-icon bp-icon-layers" aria-hidden="true"></i> 레이어
+            </button>
+          </div>
+
+          <!-- 하단 : 레이어 빠른 토글 칩 -->
+          <div class="gisx-chips gisx-overlay-ui" id="gisChips" role="group" aria-label="레이어 표시 전환"></div>
+
+          <!-- 우하단 : 자가 데이터박스 -->
+          <div class="gisx-self gisx-overlay-ui" id="gisSelfBox"></div>
+        </div>
+
+        <!-- 개체 목록 (접이식) -->
+        <div class="gisx-list-panel" id="gisListPanel">
+          <button class="gisx-list-toggle" type="button" data-gis-list-toggle aria-expanded="false" aria-controls="gisList">
+            <span><i class="bp-icon bp-icon-area-of-interest" aria-hidden="true"></i> 표시 중인 개체 <strong id="gisListCount">0</strong></span>
+            <i class="gisx-list-caret bp-icon bp-icon-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="gisx-list" id="gisList"></div>
+        </div>
+      </section>
+
+      <!-- PAGE 6: RAG 기반 AI 현장 분석 결과 -->
+      <section id="viewRagReport" class="view-page">
+        <div class="stat-summary">
+          <div class="stat-box">
+            <span>누적 분석 건수</span>
+            <strong id="statRagCount">0건</strong>
+          </div>
+        </div>
+        <div class="filter-tabs">
+          <button class="tab-btn active" type="button" onclick="filterRag('ALL', this)">전체</button>
+          <button class="tab-btn" type="button" onclick="filterRag('HIGH', this)">위협 높음</button>
+          <button class="tab-btn" type="button" onclick="filterRag('MODERATE', this)">보통</button>
+          <button class="tab-btn" type="button" onclick="filterRag('LOW', this)">낮음</button>
+        </div>
+        <div id="ragReportList" class="card-list"></div>
+      </section>
+
+    </main>
+
+    <!-- 하단 퀵 메뉴 바 -->
+    <nav class="bottom-nav" aria-label="주요 메뉴">
+      <button id="navHome" class="nav-item active" type="button" onclick="switchNav('home')">
+        <i class="bp-icon bp-icon-home" aria-hidden="true"></i>
+        <span>홈</span>
+      </button>
+      <button id="navApproval" class="nav-item" type="button" onclick="switchNav('approval')">
+        <i class="bp-icon bp-icon-walk" aria-hidden="true"></i>
+        <span>출타결재</span>
+      </button>
+      <button id="navHospital" class="nav-item" type="button" onclick="switchNav('hospital')">
+        <i class="bp-icon bp-icon-diagnosis" aria-hidden="true"></i>
+        <span>진료확인</span>
+      </button>
+      <button id="navDashboard" class="nav-item" type="button" onclick="switchNav('dashboard')">
+        <i class="bp-icon bp-icon-dashboard" aria-hidden="true"></i>
+        <span>미니상황판</span>
+      </button>
+      <button id="navFirstResponse" class="nav-item" type="button" onclick="switchNav('firstResponse')">
+        <i class="bp-icon bp-icon-feed" aria-hidden="true"></i>
+        <span>초동조치</span>
+      </button>
+    </nav>
+
+    <!-- 팝업 오버레이 (계층 관리) -->
+    <!-- 1단계: 기본 상세조회 레이어 (z-index: 1000) -->
+    <div id="layerOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3>출타 상세 검토</h3>
+          <button class="close-btn" type="button" onclick="closePopup()" aria-label="닫기">&times;</button>
+        </div>
+        <div class="popup-body">
+          <table class="info-table">
+            <tr><th>구분</th><td id="mType"></td></tr>
+            <tr><th>성명</th><td id="mUser"></td></tr>
+            <tr><th>군번</th><td id="mCode"></td></tr>
+            <tr><th>일정</th><td id="mDate"></td></tr>
+            <tr><th>행선지</th><td id="mDestination"></td></tr>
+            <tr><th>사유</th><td id="mReason"></td></tr>
+            <tr><th>현재 상태</th><td id="mStatus" style="font-weight:500; color:var(--app-primary-dark);"></td></tr>
+            <tr id="rejectReasonRow" style="display:none;"><th>반려 사유</th><td id="mRejectReason" style="color:var(--app-danger);"></td></tr>
+          </table>
+        </div>
+        <div id="actionBtnGroup" class="popup-footer">
+          <button class="btn btn-danger" type="button" onclick="openRejectPopup()">반려</button>
+          <button class="btn btn-primary" type="button" onclick="requestApproveConfirm()"><span id="approveBtnText">승인</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div id="medicalLayerOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3>진료 신청 상세</h3>
+          <button class="close-btn" type="button" onclick="closeMedicalPopup()" aria-label="닫기">&times;</button>
+        </div>
+        <div class="popup-body">
+          <table class="info-table">
+            <tr><th>성명</th><td id="medUser"></td></tr>
+            <tr><th>군번</th><td id="medCode"></td></tr>
+            <tr><th>구분</th><td id="medMedicalType"></td></tr>
+            <tr><th>병원/과</th><td><span id="medHospital"></span> (<span id="medDept"></span>)</td></tr>
+            <tr><th>희망 일자</th><td id="medDate"></td></tr>
+            <tr><th>증상 요약</th><td id="medSymptom"></td></tr>
+            <tr><th>진료 상태</th><td id="medStatus" style="font-weight:500; color:var(--app-primary-dark);"></td></tr>
+          </table>
+        </div>
+        <div class="popup-footer">
+          <button id="medConfirmBtn" class="btn btn-primary" type="button" onclick="requestMedicalConfirm()">진료 신청 확인 처리</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dashDetailOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3 id="dashDetailTitle">상세 정보</h3>
+          <button class="close-btn" type="button" onclick="closeDashDetailPopup()" aria-label="닫기">&times;</button>
+        </div>
+        <div id="dashDetailBody" class="popup-body"></div>
+      </div>
+    </div>
+
+    <div id="frHistoryDetailOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3>초동조치 세부 이력</h3>
+          <button class="close-btn" type="button" onclick="closeFrHistoryDetailPopup()" aria-label="닫기">&times;</button>
+        </div>
+        <div id="frHistoryDetailBody" class="popup-body"></div>
+      </div>
+    </div>
+
+    <!-- 2단계: 상세조회 상위 입력 레이어 (z-index: 1100) -->
+    <div id="rejectOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3>반려 사유 입력</h3>
+          <button class="close-btn" type="button" onclick="closeRejectPopup()" aria-label="닫기">&times;</button>
+        </div>
+        <div class="popup-body">
+          <label class="sr-only" for="rejectInput">반려 사유</label>
+          <textarea id="rejectInput" class="form-textarea" placeholder="용사에게 전달할 반려 사유를 명확히 입력하세요."></textarea>
+        </div>
+        <div class="popup-footer">
+          <button class="btn btn-secondary" type="button" onclick="closeRejectPopup()">취소</button>
+          <button class="btn btn-danger" type="button" onclick="requestRejectConfirm()">반려 등록</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="frCompleteOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3>초동조치 완료 보고</h3>
+          <button class="close-btn" type="button" onclick="closeFrCompletePopup()" aria-label="닫기">&times;</button>
+        </div>
+        <div class="popup-body">
+          <div id="frCompleteSummary" style="margin-bottom:1.2rem; color:var(--app-muted); font-size:1.3rem; line-height:1.8rem;"></div>
+          <div class="form-group">
+            <label class="form-label" for="frActionType">조치 결과 구분</label>
+            <select id="frActionType" class="form-select">
+              <option value="현장수색 및 신원확인 완료">현장수색 및 신원확인 완료</option>
+              <option value="응급처치 및 후송 조치 완료">응급처치 및 후송 조치 완료</option>
+              <option value="초기진화 완료 및 안전점검">초기진화 완료 및 안전점검</option>
+              <option value="오상황 확인 후 상황해제">오상황 확인 후 상황해제</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-top:1.2rem;">
+            <label class="form-label" for="frActionDetail">세부 조치 내용</label>
+            <textarea id="frActionDetail" class="form-textarea" placeholder="현장에서 실시한 상세 조치 내역을 입력하세요."></textarea>
+          </div>
+        </div>
+        <div class="popup-footer">
+          <button class="btn btn-secondary" type="button" onclick="closeFrCompletePopup()">취소</button>
+          <button class="btn btn-success" type="button" onclick="submitFrComplete()">최종 상황 완료 상신</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GIS 상황판 : 개체 상세 (z-index: 1000) -->
+    <div id="gisDetailOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3 id="gisDetailTitle">개체 상세</h3>
+          <button class="close-btn" type="button" data-gis-detail-close aria-label="닫기">&times;</button>
+        </div>
+        <div id="gisDetailBody" class="popup-body"></div>
+        <div class="popup-footer">
+          <button class="btn btn-primary" type="button" data-gis-detail-close>확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GIS 상황판 : 레이어 관리 (z-index: 1100) -->
+    <div id="gisLayerOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3>레이어 관리</h3>
+          <button class="close-btn" type="button" data-gis-layer-close aria-label="닫기">&times;</button>
+        </div>
+        <div class="popup-body">
+          <p class="gisx-layer-guide">조회할 정보만 선택해서 표시할 수 있습니다.</p>
+          <div id="gisLayerBody" class="gisx-layer-list"></div>
+        </div>
+        <div class="popup-footer">
+          <button class="btn btn-primary" type="button" data-gis-layer-close>확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 현장 사진 첨부 (z-index: 1100) -->
+    <div id="ragAttachOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3>현장 사진 첨부</h3>
+          <button class="close-btn" type="button" onclick="closeRagAttach()" aria-label="닫기">&times;</button>
+        </div>
+        <div class="popup-body">
+          <p class="rag-attach-guide"><strong id="ragAttachScenario">현장</strong> 상황에서 촬영된 사진입니다. 확인 후 분석에 사용하세요.</p>
+
+          <button class="rag-pick" id="ragPickSample" type="button" onclick="pickRagSample()">
+            <img id="ragPickImg" class="rag-pick-img" src="" alt="">
+            <span class="rag-pick-meta">
+              <span class="rag-pick-name" id="ragPickName">현장 촬영본</span>
+              <span class="rag-pick-sub" id="ragPickSub"></span>
+            </span>
+            <i class="rag-pick-check bp-icon bp-icon-small-tick" aria-hidden="true"></i>
+          </button>
+
+          <p class="rag-attach-hint">※ 시연용 시뮬레이션이므로 시나리오별 현장 촬영본만 사용합니다.</p>
+        </div>
+        <div class="popup-footer">
+          <button class="btn btn-secondary" type="button" onclick="closeRagAttach()">취소</button>
+          <button class="btn btn-primary" type="button" onclick="confirmRagAttach()">이 사진으로 분석</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAG 분석 결과 리포트 (z-index: 1100) -->
+    <div id="ragReportOverlay" class="overlay">
+      <div class="popup">
+        <div class="popup-header">
+          <h3>AI 현장 분석 리포트</h3>
+          <button class="close-btn" type="button" onclick="closeRagReport()" aria-label="닫기">&times;</button>
+        </div>
+        <div id="ragReportBody" class="popup-body"></div>
+        <div class="popup-footer">
+          <button class="btn btn-primary" type="button" onclick="closeRagReport()">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3단계: 최상위 Confirm/Alert 모달 (z-index: 1200) -->
+    <div id="confirmOverlay" class="overlay">
+      <div class="popup modal-small">
+        <div class="popup-header">
+          <h3>확인 요청</h3>
+        </div>
+        <div class="popup-body" style="text-align:center;">
+          <p id="confirmMessage" style="margin:0; color:var(--app-body); font-size:1.4rem; font-weight:500; line-height:2rem;"></p>
+        </div>
+        <div class="popup-footer">
+          <button class="btn btn-secondary" type="button" onclick="closeConfirmPopup()">취소</button>
+          <button class="btn btn-primary" type="button" onclick="executePendingAction()">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      RAG 진행 팝업 (z-index: 1200)
+      [수정 2026-08-25] 종전에는 이 팝업이 #viewHome 안에 있어서, 화면을 전환하면
+      .view-page 가 display:none 이 되며 진행 팝업까지 같이 사라졌다.
+      다른 팝업들과 같은 레벨(프레임 직속)로 옮기고 .overlay/.popup 구조로 통일한다.
+    -->
+    <!-- 무입력 자동 초기화 안내 (30초 카운트다운 막바지에 노출) -->
+    <div id="idleNotice" class="idle-notice" role="status" aria-live="polite">
+      <i class="bp-icon bp-icon-time" aria-hidden="true"></i>
+      <span>무입력 <strong id="idleSeconds">10</strong>초 후 처음 화면으로 돌아갑니다</span>
+    </div>
+
+    <div id="ragModalPopup" class="overlay">
+      <div class="popup modal-small">
+        <div class="popup-header">
+          <h3>RAG 기반 AI 현장 분석</h3>
+        </div>
+        <div class="popup-body">
+          <div class="rag-progress-body">
+            <img id="ragProgressThumb" class="rag-progress-thumb" src="" alt="" hidden>
+            <div id="popupProgressText" class="rag-progress-msg">준비 중...</div>
+            <div class="rag-progress-bar"><i id="popupProgressBar" style="width:0%"></i></div>
+            <ul class="rag-step-list" id="ragStepList">
+              <li class="rag-step" data-step="1"><span class="rag-step-no">1</span> 멀티모달 임베딩</li>
+              <li class="rag-step" data-step="2"><span class="rag-step-no">2</span> Vector DB 검색</li>
+              <li class="rag-step" data-step="3"><span class="rag-step-no">3</span> 문맥 증강(Augmentation)</li>
+              <li class="rag-step" data-step="4"><span class="rag-step-no">4</span> LLM 추론 및 리포트 작성</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="role-switcher">
-    <span><i class="fa-solid fa-user-gear"></i> 시연 권한:</span>
-    <select id="roleSelect" onchange="changeRole()">
-      <option value="ADMIN">행정보급관 (검토/확인자)</option>
-      <option value="COMMANDER">중대장 (최종 결재/확인자)</option>
-    </select>
-  </div>
-
-  <div class="app-header">
-    <h2 id="headerTitle"><i class="fa-solid fa-house"></i> Smart Unit 지휘결재</h2>
-  </div>
-
-  <div class="content-area">
-    
-    <!-- 1. 메인 홈 화면 -->
-    <div id="viewHome" class="view-page active">
-      <div class="welcome-card">
-        <h3 id="welcomeText">충성! 행정보급관님</h3>
-        <p id="welcomeSub">용사 출타 검토 및 진료 확인 현황을 관리합니다.</p>
-      </div>
-
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="label">출타 검토대기</div>
-          <div class="num" id="statReview">1건</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">진료 확인대기</div>
-          <div class="num" id="statMedicalPending" style="color:var(--warning)">1건</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">오늘 외진예정</div>
-          <div class="num" style="color:#10b981;">2명</div>
-        </div>
-      </div>
-
-      <div class="section-title">
-        <span><i class="fa-solid fa-layer-group"></i> 부대 지휘결재 및 업무 메뉴</span>
-      </div>
-
-      <div class="menu-grid">
-        <div class="menu-item" onclick="switchNav('approval')">
-          <i class="fa-solid fa-file-signature"></i>
-          <span>출타 검토/결재</span>
-        </div>
-        <div class="menu-item" onclick="switchNav('hospital')">
-          <i class="fa-solid fa-hospital-user"></i>
-          <span>진료 신청 확인</span>
-        </div>
-        <div class="menu-item disabled" onclick="alert('배차 지휘승인 기능 준비 중')">
-          <i class="fa-solid fa-truck-monster"></i>
-          <span>배차 지휘승인</span>
-        </div>
-        <div class="menu-item disabled" onclick="alert('당직 및 무기/탄약 승인 준비 중')">
-          <i class="fa-solid fa-shield-halved"></i>
-          <span>당직/무기 관리</span>
-        </div>
-        <div class="menu-item disabled" onclick="alert('포상 및 성과제 외박 관리 준비 중')">
-          <i class="fa-solid fa-award"></i>
-          <span>포상/특박 관리</span>
-        </div>
-        <div class="menu-item disabled" onclick="alert('부대 훈련 및 일과표 관리 준비 중')">
-          <i class="fa-solid fa-calendar-check"></i>
-          <span>훈련/일정 관리</span>
-        </div>
-        <div class="menu-item disabled" onclick="alert('부대 인원 현황 파악 준비 중')">
-          <i class="fa-solid fa-users-viewfinder"></i>
-          <span>인원/병력 현황</span>
-        </div>
-        <div class="menu-item disabled" onclick="alert('추가 메뉴 확장 가능 슬롯입니다.')">
-          <i class="fa-solid fa-plus"></i>
-          <span>기능 추가</span>
-        </div>
-      </div>
-
-      <div class="section-title">
-        <span><i class="fa-solid fa-clock-rotate-left"></i> 최근 요청 및 진료 접수</span>
-      </div>
-
-      <div id="recentNotifList"></div>
-    </div>
-
-    <!-- 2. 출타 검토/결재 목록 화면 -->
-    <div id="viewApproval" class="view-page">
-      <div class="filter-tabs">
-        <button class="tab-btn active" onclick="filterList('ALL')">전체</button>
-        <button class="tab-btn" onclick="filterList('REVIEW')">검토대기</button>
-        <button class="tab-btn" onclick="filterList('APPROVAL')">결재대기</button>
-        <button class="tab-btn" onclick="filterList('SUCCESS')">최종승인</button>
-        <button class="tab-btn" onclick="filterList('REJECT')">반려</button>
-      </div>
-
-      <div id="requestList"></div>
-    </div>
-
-    <!-- 3. 진료 신청 확인 목록 화면 (별도 결재 단계 없이 내용 확인 처리) -->
-    <div id="viewHospital" class="view-page">
-      <div class="filter-tabs">
-        <button class="tab-btn active" onclick="filterMedical('ALL')">전체</button>
-        <button class="tab-btn" onclick="filterMedical('SUBMITTED')">확인대기</button>
-        <button class="tab-btn" onclick="filterMedical('CONFIRMED')">확인완료</button>
-      </div>
-
-      <div id="medicalList"></div>
-    </div>
-
-  </div>
-
-  <!-- 1차 출타 상세 레이어 팝업 -->
-  <div class="layer-overlay" id="layerOverlay">
-    <div class="layer-popup">
-      <div class="popup-header">
-        <h3 style="font-size: 14px; font-weight: bold; color: var(--text);">출타 신청 상세 정보</h3>
-        <i class="fa-solid fa-xmark" onclick="closePopup()" style="cursor:pointer; font-size: 16px; color: #64748b;"></i>
-      </div>
-      
-      <div class="popup-body">
-        <table class="info-table">
-          <tr><th>신청 유형</th><td id="mType">휴가</td></tr>
-          <tr><th>신청자 (용사)</th><td id="mUser">일병 홍길동</td></tr>
-          <tr><th>군번</th><td id="mCode">25-912301</td></tr>
-          <tr><th>세부 일정</th><td id="mDate">2026.10.29 ~ 2026.10.31</td></tr>
-          <tr><th>행선지</th><td id="mDestination">부산광역시 남구</td></tr>
-          <tr><th>신청 사유</th><td id="mReason">포상휴가 신청</td></tr>
-          <tr><th>현재 상태</th><td id="mStatus">검토대기</td></tr>
-          <tr id="rejectReasonRow" style="display:none; background:#fef2f2;">
-            <th style="color:var(--danger);">반려 사유</th>
-            <td id="mRejectReason" style="color:var(--danger); font-weight:bold;"></td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="popup-footer" id="actionBtnGroup">
-        <button class="btn btn-reject" onclick="openRejectPopup()">반려 처리</button>
-        <button class="btn btn-approve" id="approveBtnText" onclick="requestApproveConfirm()">상신 처리</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 1차 진료 신청 상세 확인 레이어 팝업 (단단형 단순확인) -->
-  <div class="layer-overlay" id="medicalLayerOverlay">
-    <div class="layer-popup">
-      <div class="popup-header">
-        <h3 style="font-size: 14px; font-weight: bold; color: var(--text);"><i class="fa-solid fa-notes-medical" style="color:var(--primary);"></i> 진료 신청 상세 내용</h3>
-        <i class="fa-solid fa-xmark" onclick="closeMedicalPopup()" style="cursor:pointer; font-size: 16px; color: #64748b;"></i>
-      </div>
-      
-      <div class="popup-body">
-        <div style="background:#eff6ff; padding:8px 10px; border-radius:4px; font-size:11px; color:#1e40af; margin-bottom:10px;">
-          <i class="fa-solid fa-circle-info"></i> 진료 신청은 별도의 결재 단계 없이 간부 확인 및 기록 목적으로 관리됩니다.
-        </div>
-        <table class="info-table">
-          <tr><th>신청자 (용사)</th><td id="medUser">이병 이몽룡</td></tr>
-          <tr><th>군번</th><td id="medCode">26-992101</td></tr>
-          <tr><th>진료 유형</th><td id="medMedicalType">초진</td></tr>
-          <tr><th>대상 병원</th><td id="medHospital">국군수도병원</td></tr>
-          <tr><th>진료과</th><td id="medDept">정형외과</td></tr>
-          <tr><th>진료 희망일</th><td id="medDate">2026.08.28 (금)</td></tr>
-          <tr><th>증상 및 사유</th><td id="medSymptom">훈련 중 우측 발목 捻挫 증상 지속</td></tr>
-          <tr><th>확인 상태</th><td id="medStatus">확인대기</td></tr>
-        </table>
-      </div>
-
-      <div class="popup-footer" id="medActionBtnGroup">
-        <button class="btn btn-cancel" onclick="closeMedicalPopup()">닫기</button>
-        <button class="btn btn-approve" id="medConfirmBtn" onclick="requestMedicalConfirm()">신청 내용 확인 처리</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2차 반려 사유 입력 레이어 팝업 (출타 전용) -->
-  <div class="layer-overlay" id="rejectOverlay" style="z-index: 300;">
-    <div class="layer-popup">
-      <div class="popup-header">
-        <h3 style="font-size: 14px; font-weight: bold; color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> 반려 사유 입력</h3>
-        <i class="fa-solid fa-xmark" onclick="closeRejectPopup()" style="cursor:pointer; font-size: 16px; color: #64748b;"></i>
-      </div>
-      
-      <div class="popup-body">
-        <p style="font-size: 12px; color: #475569; margin-bottom: 8px;">용사에게 전달될 반려 사유를 입력하세요.</p>
-        <textarea id="rejectInput" rows="4" style="width:100%; border:1px solid var(--border); border-radius:4px; padding:8px; font-size:12px; resize:none;" placeholder="예: 부대 훈련 일정과 중복되어 반려 처리함"></textarea>
-      </div>
-
-      <div class="popup-footer">
-        <button class="btn btn-cancel" onclick="closeRejectPopup()">취소</button>
-        <button class="btn btn-reject" onclick="requestRejectConfirm()">반려 확정</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3차 최종 확인의사 레이어 팝업 (Confirm Modal) -->
-  <div class="layer-overlay" id="confirmOverlay" style="z-index: 400;">
-    <div class="layer-popup" style="max-width: 320px;">
-      <div class="popup-header">
-        <h3 style="font-size: 14px; font-weight: bold; color: var(--text);"><i class="fa-solid fa-circle-question" style="color:var(--primary);"></i> 최종 확인</h3>
-        <i class="fa-solid fa-xmark" onclick="closeConfirmPopup()" style="cursor:pointer; font-size: 16px; color: #64748b;"></i>
-      </div>
-      
-      <div class="popup-body" style="text-align: center; padding: 20px 16px;">
-        <p style="font-size: 13px; font-weight: bold; color: var(--text);" id="confirmMessage">이 작업을 진행하시겠습니까?</p>
-        <p style="font-size: 11px; color: var(--sub-text); margin-top: 4px;">처리 후 상태가 변경 반영됩니다.</p>
-      </div>
-
-      <div class="popup-footer">
-        <button class="btn btn-cancel" onclick="closeConfirmPopup()">취소</button>
-        <button class="btn btn-approve" id="confirmExecuteBtn" onclick="executePendingAction()">확인</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="bottom-nav">
-    <div class="nav-item active" id="navHome" onclick="switchNav('home')">
-      <i class="fa-solid fa-house"></i>홈
-    </div>
-    <div class="nav-item" id="navApproval" onclick="switchNav('approval')">
-      <i class="fa-solid fa-file-signature"></i>출타검토
-    </div>
-    <div class="nav-item" id="navHospital" onclick="switchNav('hospital')">
-      <i class="fa-solid fa-hospital-user"></i>진료확인
-    </div>
-    <div class="nav-item" onclick="alert('간부 마이페이지 연동 예정입니다.')">
-      <i class="fa-solid fa-user-shield"></i>마이페이지
-    </div>
-  </div>
-</div>
-
-<script>
-  /* 출타 결재 데이터 */
-  let requests = [
-    { id: 82, type: '외출', user: '일병 홍길동', code: '25-912301', date: '2026.09.05 (09:00~18:00)', dest: '부산광역시 남구', reason: '포상외출', status: 'REVIEW', rejectReason: '' },
-    { id: 81, type: '휴가', user: '상병 임꺽정', code: '25-710239', date: '2026.09.10 ~ 2026.09.14', dest: '서울특별시 마포구', reason: '정기휴가', status: 'APPROVAL', rejectReason: '' },
-    { id: 80, type: '외박', user: '병장 이순신', code: '24-110293', date: '2026.09.12 ~ 2026.09.13', dest: '강원도 춘천시', reason: '성과제 외박', status: 'SUCCESS', rejectReason: '' }
-  ];
-
-  /* 진료 신청 데이터 (결재 없이 확인 기능만 존재) */
-  let medicalRequests = [
-    { id: 101, user: '이병 이몽룡', code: '26-992101', medicalType: '초진', hospital: '국군수도병원', dept: '정형외과', date: '2026.08.28', symptom: '훈련 중 우측 발목 통증', status: 'SUBMITTED' },
-    { id: 102, user: '상병 강감찬', code: '25-330192', medicalType: '재진', hospital: '대전지구병원', dept: '이비인후과', date: '2026.08.26', symptom: '비염 치료 지속', status: 'CONFIRMED' }
-  ];
-
-  let currentRole = 'ADMIN';
-  let currentFilter = 'ALL';
-  let currentMedicalFilter = 'ALL';
-  let selectedReqId = null;
-  let selectedMedicalId = null;
-  let pendingAction = null;
-
-  function changeRole() {
-    currentRole = document.getElementById('roleSelect').value;
-    const welcomeText = document.getElementById('welcomeText');
-    const welcomeSub = document.getElementById('welcomeSub');
-
-    if(currentRole === 'ADMIN') {
-      welcomeText.innerText = '충성! 행정보급관님';
-      welcomeSub.innerText = '용사 출타 검토 및 진료확인 신청을 관리합니다.';
-    } else if(currentRole === 'COMMANDER') {
-      welcomeText.innerText = '충성! 중대장님';
-      welcomeSub.innerText = '최종 결재 안건 심사 및 부대 진료 접수를 확인합니다.';
-    }
-    renderList();
-    renderMedicalList();
-    renderHomeNotif();
-  }
-
-  function switchNav(target) {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.view-page').forEach(v => v.classList.remove('active'));
-
-    const headerTitle = document.getElementById('headerTitle');
-
-    if(target === 'home') {
-      document.getElementById('navHome').classList.add('active');
-      document.getElementById('viewHome').classList.add('active');
-      headerTitle.innerHTML = `<i class="fa-solid fa-house"></i> Smart Unit 지휘결재`;
-    } else if(target === 'approval') {
-      document.getElementById('navApproval').classList.add('active');
-      document.getElementById('viewApproval').classList.add('active');
-      headerTitle.innerHTML = `<i class="fa-solid fa-file-signature"></i> 용사 출타 검토 및 결재`;
-    } else if(target === 'hospital') {
-      document.getElementById('navHospital').classList.add('active');
-      document.getElementById('viewHospital').classList.add('active');
-      headerTitle.innerHTML = `<i class="fa-solid fa-hospital-user"></i> 용사 진료 신청 확인`;
-      renderMedicalList();
-    }
-  }
-
-  function renderList() {
-    const listEl = document.getElementById('requestList');
-    listEl.innerHTML = '';
-
-    const filtered = requests.filter(r => currentFilter === 'ALL' || r.status === currentFilter);
-
-    if(filtered.length === 0) {
-      listEl.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:30px; font-size:12px;">해당 안건이 없습니다.</div>`;
-      return;
-    }
-
-    filtered.forEach(item => {
-      let badgeHtml = '';
-      if(item.status === 'REVIEW') badgeHtml = `<span class="badge badge-review">검토대기</span>`;
-      else if(item.status === 'APPROVAL') badgeHtml = `<span class="badge badge-approval">결재대기</span>`;
-      else if(item.status === 'SUCCESS') badgeHtml = `<span class="badge badge-success">최종승인</span>`;
-      else if(item.status === 'REJECT') badgeHtml = `<span class="badge badge-reject">반려</span>`;
-
-      const card = document.createElement('div');
-      card.className = 'req-card';
-      card.onclick = () => openPopup(item.id);
-      card.innerHTML = `
-        <div class="card-header">
-          <strong style="font-size:13px; color:#0f172a;">(${item.type}) ${item.user}</strong>
-          ${badgeHtml}
-        </div>
-        <div style="font-size:11px; color:#64748b;">일정: ${item.date}</div>
-        <div style="font-size:11px; color:#64748b;">사유: ${item.reason}</div>
-      `;
-      listEl.appendChild(card);
-    });
-
-    document.getElementById('statReview').innerText = requests.filter(r => r.status === 'REVIEW').length + '건';
-  }
-
-  function renderMedicalList() {
-    const listEl = document.getElementById('medicalList');
-    listEl.innerHTML = '';
-
-    const filtered = medicalRequests.filter(m => currentMedicalFilter === 'ALL' || m.status === currentMedicalFilter);
-
-    if(filtered.length === 0) {
-      listEl.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:30px; font-size:12px;">진료 신청 내역이 없습니다.</div>`;
-      return;
-    }
-
-    filtered.forEach(item => {
-      let badgeHtml = item.status === 'SUBMITTED' 
-        ? `<span class="badge badge-review">확인대기</span>` 
-        : `<span class="badge badge-success">확인완료</span>`;
-
-      const card = document.createElement('div');
-      card.className = 'req-card';
-      card.onclick = () => openMedicalPopup(item.id);
-      card.innerHTML = `
-        <div class="card-header">
-          <strong style="font-size:13px; color:#0f172a;">[진료확인] ${item.user} (${item.medicalType})</strong>
-          ${badgeHtml}
-        </div>
-        <div style="font-size:11px; color:#64748b;">병원/과: ${item.hospital} (${item.dept})</div>
-        <div style="font-size:11px; color:#64748b;">희망일: ${item.date}</div>
-      `;
-      listEl.appendChild(card);
-    });
-
-    document.getElementById('statMedicalPending').innerText = medicalRequests.filter(m => m.status === 'SUBMITTED').length + '건';
-  }
-
-  function renderHomeNotif() {
-    const notifContainer = document.getElementById('recentNotifList');
-    notifContainer.innerHTML = '';
-
-    const recentItems = [
-      ...requests.map(r => ({ ...r, category: '출타' })),
-      ...medicalRequests.map(m => ({ id: m.id, type: '진료', user: m.user, reason: `${m.hospital} (${m.dept}) ${m.medicalType}`, category: '진료' }))
-    ].slice(0, 3);
-
-    recentItems.forEach(req => {
-      const item = document.createElement('div');
-      item.className = 'notif-item';
-      item.onclick = () => { 
-        if(req.category === '출타') { switchNav('approval'); openPopup(req.id); }
-        else { switchNav('hospital'); openMedicalPopup(req.id); }
-      };
-      item.innerHTML = `
-        <div>
-          <strong style="color:var(--text);">[${req.type}] ${req.user}</strong>
-          <div style="font-size:10px; color:var(--sub-text); margin-top:2px;">${req.reason}</div>
-        </div>
-        <i class="fa-solid fa-chevron-right" style="color:#cbd5e1; font-size:10px;"></i>
-      `;
-      notifContainer.appendChild(item);
-    });
-  }
-
-  function filterList(filterType) {
-    currentFilter = filterType;
-    if(event && event.target && event.target.classList) {
-      event.target.parentElement.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-    }
-    renderList();
-  }
-
-  function filterMedical(filterType) {
-    currentMedicalFilter = filterType;
-    if(event && event.target && event.target.classList) {
-      event.target.parentElement.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-    }
-    renderMedicalList();
-  }
-
-  /* 출타 상세 팝업 */
-  function openPopup(id) {
-    selectedReqId = id;
-    const req = requests.find(r => r.id === id);
-    if(!req) return;
-
-    document.getElementById('mType').innerText = req.type;
-    document.getElementById('mUser').innerText = req.user;
-    document.getElementById('mCode').innerText = req.code;
-    document.getElementById('mDate').innerText = req.date;
-    document.getElementById('mDestination').innerText = req.dest;
-    document.getElementById('mReason').innerText = req.reason;
-
-    const actionGroup = document.getElementById('actionBtnGroup');
-    const approveBtn = document.getElementById('approveBtnText');
-    const rejectRow = document.getElementById('rejectReasonRow');
-
-    let statusTxt = '';
-    if(req.status === 'REVIEW') statusTxt = '행정보급관 검토 대기 중';
-    if(req.status === 'APPROVAL') statusTxt = '중대장 결재 대기 중';
-    if(req.status === 'SUCCESS') statusTxt = '최종 승인 완료';
-    if(req.status === 'REJECT') statusTxt = '반려 처리됨';
-    document.getElementById('mStatus').innerText = statusTxt;
-
-    if(req.status === 'REJECT') {
-      rejectRow.style.display = 'table-row';
-      document.getElementById('mRejectReason').innerText = req.rejectReason || '사유 미기재';
-    } else {
-      rejectRow.style.display = 'none';
-    }
-
-    if(currentRole === 'ADMIN' && req.status === 'REVIEW') {
-      actionGroup.style.display = 'flex';
-      approveBtn.innerText = '검토 후 결재 상신';
-    } else if(currentRole === 'COMMANDER' && req.status === 'APPROVAL') {
-      actionGroup.style.display = 'flex';
-      approveBtn.innerText = '최종 결재 승인';
-    } else {
-      actionGroup.style.display = 'none';
-    }
-
-    document.getElementById('layerOverlay').classList.add('active');
-  }
-
-  function closePopup() { document.getElementById('layerOverlay').classList.remove('active'); }
-
-  /* 진료 상세 팝업 (단순 확인 처리 기능만 제공) */
-  function openMedicalPopup(id) {
-    selectedMedicalId = id;
-    const med = medicalRequests.find(m => m.id === id);
-    if(!med) return;
-
-    document.getElementById('medUser').innerText = med.user;
-    document.getElementById('medCode').innerText = med.code;
-    document.getElementById('medMedicalType').innerText = med.medicalType;
-    document.getElementById('medHospital').innerText = med.hospital;
-    document.getElementById('medDept').innerText = med.dept;
-    document.getElementById('medDate').innerText = med.date;
-    document.getElementById('medSymptom').innerText = med.symptom;
-    document.getElementById('medStatus').innerText = med.status === 'SUBMITTED' ? '확인 대기 중' : '간부 확인 완료';
-
-    const confirmBtn = document.getElementById('medConfirmBtn');
-    if(med.status === 'SUBMITTED') {
-      confirmBtn.style.display = 'block';
-    } else {
-      confirmBtn.style.display = 'none';
-    }
-
-    document.getElementById('medicalLayerOverlay').classList.add('active');
-  }
-
-  function closeMedicalPopup() { document.getElementById('medicalLayerOverlay').classList.remove('active'); }
-
-  function openRejectPopup() {
-    document.getElementById('rejectInput').value = '';
-    document.getElementById('rejectOverlay').classList.add('active');
-  }
-
-  function closeRejectPopup() { document.getElementById('rejectOverlay').classList.remove('active'); }
-
-  function openConfirmModal(msg, actionFn) {
-    document.getElementById('confirmMessage').innerText = msg;
-    pendingAction = actionFn;
-    document.getElementById('confirmOverlay').classList.add('active');
-  }
-
-  function closeConfirmPopup() {
-    document.getElementById('confirmOverlay').classList.remove('active');
-    pendingAction = null;
-  }
-
-  function executePendingAction() {
-    if(typeof pendingAction === 'function') {
-      pendingAction();
-    }
-    closeConfirmPopup();
-  }
-
-  function requestMedicalConfirm() {
-    openConfirmModal('해당 용사의 진료 신청 내역을 확인 완료 처리하시겠습니까?', () => {
-      const med = medicalRequests.find(m => m.id === selectedMedicalId);
-      if(med) {
-        med.status = 'CONFIRMED';
-      }
-      closeMedicalPopup();
-      renderMedicalList();
-      renderHomeNotif();
-    });
-  }
-
-  function requestRejectConfirm() {
-    const reasonText = document.getElementById('rejectInput').value.trim();
-    if(!reasonText) {
-      alert('반려 사유를 입력해 주세요.');
-      return;
-    }
-
-    openConfirmModal('입력한 사유로 반려 처리를 진행하시겠습니까?', () => {
-      const req = requests.find(r => r.id === selectedReqId);
-      if(req) {
-        req.status = 'REJECT';
-        req.rejectReason = reasonText;
-      }
-      closeRejectPopup();
-      closePopup();
-      renderList();
-      renderHomeNotif();
-    });
-  }
-
-  function requestApproveConfirm() {
-    const actionTxt = currentRole === 'ADMIN' ? '검토 완료 후 중대장에게 결재를 상신하시겠습니까?' : '해당 출타 신청을 최종 결재 승인하시겠습니까?';
-    
-    openConfirmModal(actionTxt, () => {
-      const req = requests.find(r => r.id === selectedReqId);
-      if(req) {
-        if(currentRole === 'ADMIN') req.status = 'APPROVAL';
-        else if(currentRole === 'COMMANDER') req.status = 'SUCCESS';
-      }
-      closePopup();
-      renderList();
-      renderHomeNotif();
-    });
-  }
-
-  changeRole();
-</script>
+  <!--
+    [수정 2026-08-25] type="module" 인라인 스크립트 제거.
+    file:// 로 열면 모듈 import 가 CORS 로 차단돼 window.runSimulation 이 정의되지 않았다.
+    일반 스크립트 3개로 순서대로 로드한다 (데이터 → 시뮬레이터 → 앱).
+  -->
+  <script src="ragScenarios.js"></script>
+  <script src="ragSimulator.js"></script>
+  <script src="gisScenarios.js"></script>
+  <script src="gisBoard.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
